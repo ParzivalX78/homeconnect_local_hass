@@ -157,10 +157,25 @@ class HCProgram(HCSelect):
             )
             if self._active_program_entity is not None:
                 self._entities.append(self._active_program_entity)
+        # Listen to each program too: the appliance flags programs available
+        # or unavailable per program (in the device description and live via
+        # /ro/descriptionChange), and options follows that flag.
+        for program_name in self._programs:
+            self._entities.append(self._runtime_data.appliance.programs[program_name])
 
     @property
     def options(self) -> list[str]:
-        return list(self._programs.values())
+        # Only the programs the appliance currently offers - the same list the
+        # Home Connect cloud integration shows. A program without the flag
+        # (None) counts as offered. The current program always stays, so the
+        # select never shows a value that isn't in its own list.
+        current_option = self.current_option
+        return [
+            option
+            for program_name, option in self._programs.items()
+            if self._runtime_data.appliance.programs[program_name].available is not False
+            or option == current_option
+        ]
 
     @property
     def available(self) -> bool:

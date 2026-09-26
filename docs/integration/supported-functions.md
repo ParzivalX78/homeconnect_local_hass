@@ -10,7 +10,7 @@ The following entities are available. Which ones appear depends on the appliance
 | Program Progress | Sensor | Progress as a percentage |
 | Start In | Sensor / Number | Delay before the program starts |
 | Finish In | Sensor / Number | Target time until the program finishes |
-| Select Program | Select | Choose a program to run, may not be writeable on laundry machines |
+| Select Program | Select | Choose a program to run, may not be writeable on laundry machines. Only lists the programs the appliance currently offers (the current program always stays listed) |
 | Start / Abort / Pause / Resume | Button | Control the active program |
 | Power State | Switch / Select | Turn the appliance on or off |
 | Child Lock | Switch | Lock the physical controls |
