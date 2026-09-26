@@ -26,6 +26,7 @@ from homeassistant.const import (
     ATTR_FRIENDLY_NAME,
     STATE_OFF,
     STATE_ON,
+    STATE_UNKNOWN,
 )
 
 from . import setup_config_entry
@@ -82,6 +83,10 @@ async def test_update_on_off(
 ) -> None:
     """Test On/Off."""
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+
+    # No value reported yet: unknown, not off.
+    state = hass.states.get("light.fake_brand_homeappliance_light_1")
+    assert state.state == STATE_UNKNOWN
 
     await mock_appliance.entities["Test.Lighting"].update({"value": True})
     await hass.async_block_till_done()
