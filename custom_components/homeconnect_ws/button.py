@@ -46,6 +46,11 @@ class HCButton(HCEntity, ButtonEntity):
 
     _entity: Command | Setting
     entity_description: HCButtonEntityDescription
+    # A button has no value to keep showing, so a read-only one (e.g. the
+    # clock button while "Synchronize time with server" is on) goes
+    # unavailable instead of staying pressable only to raise an error.
+    # HCStartButton is deliberately different - see its available.
+    _show_when_locked = False
 
     @error_decorator
     async def async_press(self) -> None:
