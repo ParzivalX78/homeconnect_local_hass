@@ -152,8 +152,6 @@ Each has reasons to pick it:
 
 The docs for both integrations should explain this so people can choose.
 
-A possible long-term step, not part of this plan: Home Connect Local's connection could become a local transport inside `home_connect`, with the cloud used for sign-in and as a fallback and local control whenever the appliance is reachable (Roborock already combines cloud setup with local control). That needs the cloud integration's code owners to agree and would be a larger project than everything above, so it's only worth raising once the port is finished and has a track record.
-
 ## Open questions
 
 - Does the core review accept BSH's app client for the account sign-in? There's precedent (`simplisafe`, `roborock`), but BSH deliberately restricts the scopes for local keys to its own client.
