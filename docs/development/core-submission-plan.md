@@ -138,6 +138,22 @@ While porting, the custom integration stays the place to try new things. Anythin
 - **The simulator** stays a development tool. It isn't part of the core submission.
 - **Archiving** this repository is optional. Keeping it around for pre-releases of new features is fine, as long as the README makes clear core is the main version.
 
+### Relationship with the cloud integration
+
+Home Connect Local and the cloud `home_connect` integration will coexist in core. Home Assistant doesn't remove an integration because a newer one does more; removals happen when a service or library stops working or nobody maintains it. The cloud integration is actively maintained and uses BSH's official API, so plan around both staying.
+
+Each has reasons to pick it:
+
+| Pick Home Connect Local for | Pick the cloud integration for |
+| --- | --- |
+| More entities than the official API exposes | Setup with the official sign-in, no local key involved |
+| Faster responses (no round trip through BSH's servers) | Support from BSH: firmware updates won't break it, while the local protocol is reverse-engineered |
+| Keeps working without internet and with the cloud connection turned off | Setups where Home Assistant can't reach the appliance at all, such as a firewall blocking the appliance's network or Home Assistant running at a different site. A missing mDNS route alone isn't one of them, since Home Connect Local can connect by IP address |
+
+The docs for both integrations should explain this so people can choose.
+
+A possible long-term step, not part of this plan: Home Connect Local's connection could become a local transport inside `home_connect`, with the cloud used for sign-in and as a fallback and local control whenever the appliance is reachable (Roborock already combines cloud setup with local control). That needs the cloud integration's code owners to agree and would be a larger project than everything above, so it's only worth raising once the port is finished and has a track record.
+
 ## Open questions
 
 - Does the core review accept BSH's app client for the account sign-in? There's precedent (`simplisafe`, `roborock`), but BSH deliberately restricts the scopes for local keys to its own client.
