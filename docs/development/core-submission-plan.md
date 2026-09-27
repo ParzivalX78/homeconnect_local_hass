@@ -137,12 +137,14 @@ Suggested order (description counts are how many entity descriptions each platfo
 
 Features that are on the custom integration's own roadmap (for example the per-appliance option-value calibration from [discussion #104](https://github.com/vemboy200/homeconnect_local_hass/discussions/104), or a single summary problem entity) go into whichever side is current at the time. Where core's cloud `home_connect` integration has the same limitation, fixing it isn't a condition for the port.
 
+Expect issues from people who remove the custom integration and switch to core before the port is finished: missing entities, and if the domain stayed `homeconnect_ws`, entries that don't load because the custom integration created them with a newer config entry version than core has. Handle those as they come in.
+
 While porting, the custom integration stays the place to try new things. Anything added here before it's ported gets ported in the same way.
 
 ## Phase 4: after everything is ported
 
 - **Deprecate the custom integration.** Once core has feature parity, stop adding features here and put a notice at the top of the README pointing to the core integration.
-- **Migration guide.** If the domain stayed `homeconnect_ws`, removing the custom integration from HACS and restarting keeps every config entry, device and entity, because the core integration reads the same entries and unique IDs. This only works if core's config entry `VERSION` is at least the custom integration's (currently 2): Home Assistant refuses to load an entry created by a newer version than the integration it's loading into. Document the exact steps and test them on a real install first. If the domain changed, the guide is "remove and re-add each appliance".
+- **Migration guide.** If the domain stayed `homeconnect_ws`, removing the custom integration from HACS and restarting keeps every config entry, device and entity, because the core integration reads the same entries and unique IDs. Document the exact steps and test them on a real install first. If the domain changed, the guide is "remove and re-add each appliance".
 - **Issues and discussions.** Point new reports to the core issue tracker. Keep this repository's issues open until the existing ones are resolved or moved.
 - **Docs.** The user-facing pages in `docs/integration/` move into the home-assistant.io integration page. Developer notes (`docs/development/`) stay here or move to the library.
 - **The library** stays maintained as a standalone project, since core depends on it. It becomes the place for protocol work.
