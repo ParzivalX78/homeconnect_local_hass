@@ -107,6 +107,8 @@ The first core PR is as small as core allows: **one platform (`sensor`), the con
 
 After the initial PR is merged, everything else comes over as small follow-up PRs, one thing per PR. Each PR is tested on real appliances through a custom build of the core integration first.
 
+Expect roughly 20-30 core PRs, plus a matching home-assistant.io docs PR for most of them and a standalone PR for each library bump. The target is **3-5 months from the initial PR's merge**, based on the PowerShades submission. That doesn't include the library rewrite (Phase 1) or the initial review itself, which is usually the slowest part. Hitting it means keeping independent PRs open in parallel (for example diagnostics, the brand PRs and `update`) instead of waiting for each merge before opening the next.
+
 Suggested order:
 
 0. **The other BSH brands.** Core has 8 virtual integrations that point people searching for another BSH brand to the cloud `home_connect` integration: Balay, Constructa, Gaggenau, Neff, Pitsos, Profilo, Siemens and Thermador. Each is a manifest with `"integration_type": "virtual"` and `"supported_by": "home_connect"`, and `supported_by` takes a single domain, so they can't also point to this integration. Someone searching "Thermador" or "Siemens" would only find the cloud integration. Options, to settle with reviewers:
