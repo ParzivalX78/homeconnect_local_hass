@@ -69,7 +69,7 @@ The first core PR is as small as core allows: **one platform (`sensor`), the con
 - Zeroconf discovery (`_homeconnect._tcp.local.`). Each appliance is its own config entry, so a discovered appliance that's already set up is ignored. The cloud `home_connect` integration listens for the same service type (and for DHCP), so on a fresh install both integrations can show a discovered card for the same appliance. That's accepted in core: `powerfox` (cloud) and `powerfox_local` both discover the same poweropti devices with the same zeroconf matcher, and both mark `discovery` as done. It's still worth saying in the PR description. Removing discovery from the cloud integration is its code owners' decision, not part of this plan.
 - `sensor` entities. Consider starting with a smaller set of descriptions than the custom integration's 74 (the common status sensors first) and adding the rest in follow-ups; a very large first diff is harder to review.
 - Tests with full config flow coverage, and tests for the sensor platform.
-- `quality_scale.yaml` with Bronze done and everything else marked `todo`.
+- The quality scale as far as the initial PR allows. Everything the custom integration already meets stays `done`, except the three rules for features left out of the initial PR: `diagnostics`, `reauthentication-flow` and `reconfiguration-flow` are `todo`. `dynamic-devices` and `stale-devices` stay exempt (one appliance per config entry). Rules about actions (`action-setup`, `docs-actions`) become exempt while there are no integration actions, and the rest are checked against the `sensor` platform alone.
 - The documentation PR on home-assistant.io, opened at the same time.
 
 ### What's left out on purpose
@@ -112,17 +112,16 @@ Suggested order:
    - Leave them as they are and rely on the Bosch brand plus the docs mentioning every brand.
 
    This has to come after the initial PR is merged, because hassfest checks that referenced domains exist. It doesn't block anything else, so it can run in parallel with the platform PRs.
-1. **Diagnostics.**
+1. **Diagnostics** (marks the `diagnostics` rule done).
 2. **`binary_sensor`** (75 descriptions): door, remote start allowed, problem events.
 3. **`select`** (91 descriptions): program selection and options, including locked (read-only) entities and filtering unavailable programs.
 4. **`switch`** (83) and **`number`** (34): settings and options.
 5. **`button`** (13): Start, Stop, Pause and the rest. After `select`, since starting needs a selected program.
 6. **`light`** (14) and **`fan`** (2): hood lighting and venting.
 7. **`update`** (3): software updates.
-8. **Reauthentication and reconfiguration flows.**
+8. **Reauthentication and reconfiguration flows** (the last two `todo` rules, which brings the quality scale back to where the custom integration is).
 9. **Start with delay:** replace the `start_program` / `set_start_in` / `set_finish_in` actions with entities if possible (for example a Start-in / Finish-in entity), since core prefers entities over integration actions. Keep an action only if an entity can't express it.
 10. **Profile export**, if it's still wanted in core.
-11. **Quality scale**: work up from Bronze to Platinum, one rule or a few related rules per PR.
 
 Features that are on the custom integration's own roadmap (for example the per-appliance option-value calibration from [discussion #104](https://github.com/vemboy200/homeconnect_local_hass/discussions/104), or a single summary problem entity) go into whichever side is current at the time. Where core's cloud `home_connect` integration has the same limitation, fixing it isn't a condition for the port.
 
