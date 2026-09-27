@@ -111,6 +111,9 @@
       "switch_cup_warmer": {
         "name": "Tassenwärmer"
       },
+      "switch_coffee_leave_profiles_automatically": {
+        "name": "Profile automatisch verlassen"
+      },
       "switch_half_load": {
         "name": "Halbe Ladung"
       },
@@ -3623,6 +3626,98 @@
           "six": "Sechs"
         }
       },
+      "select_coffee_switch_off_after": {
+        "name": "Abschalten nach",
+        "state": {
+          "00hours05minutes": "5 min",
+          "00hours10minutes": "10 min",
+          "00hours15minutes": "15 min",
+          "00hours20minutes": "20 min",
+          "00hours25minutes": "25 min",
+          "00hours30minutes": "30 min",
+          "00hours35minutes": "35 min",
+          "00hours40minutes": "40 min",
+          "00hours45minutes": "45 min",
+          "00hours50minutes": "50 min",
+          "00hours55minutes": "55 min",
+          "01hours00minutes": "1 h",
+          "01hours15minutes": "1 h 15 min",
+          "01hours30minutes": "1 h 30 min",
+          "01hours45minutes": "1 h 45 min",
+          "02hours00minutes": "2 h",
+          "02hours15minutes": "2 h 15 min",
+          "02hours30minutes": "2 h 30 min",
+          "02hours45minutes": "2 h 45 min",
+          "03hours00minutes": "3 h"
+        }
+      },
+      "select_coffee_water_hardness": {
+        "name": "Wasserhärte",
+        "state": {
+          "soft": "Weich",
+          "medium": "Mittel",
+          "hard": "Hart",
+          "veryhard": "Sehr hart",
+          "softeningdevice": "Enthärtungsanlage"
+        }
+      },
+      "select_coffee_user_mode": {
+        "name": "Benutzermodus",
+        "state": {
+          "standard": "Standard",
+          "barista": "Barista"
+        }
+      },
+      "select_coffee_milk_order": {
+        "name": "Reihenfolge Cappuccino",
+        "state": {
+          "firstmilk": "Erst Milch",
+          "firstcoffee": "Erst Kaffee"
+        }
+      },
+      "select_coffee_macchiato_pause": {
+        "name": "Pause Latte Macchiato",
+        "state": {
+          "min": "Minimal",
+          "5sec": "5 s",
+          "10sec": "10 s"
+        }
+      },
+      "select_coffee_milk_reminder": {
+        "name": "Milch-Erinnerung nach",
+        "state": {
+          "off": "Aus",
+          "00hours05minutes": "5 min",
+          "00hours10minutes": "10 min",
+          "00hours15minutes": "15 min",
+          "00hours20minutes": "20 min",
+          "00hours25minutes": "25 min",
+          "00hours30minutes": "30 min",
+          "00hours35minutes": "35 min",
+          "00hours40minutes": "40 min",
+          "00hours45minutes": "45 min",
+          "00hours50minutes": "50 min",
+          "00hours55minutes": "55 min",
+          "01hours00minutes": "1 h",
+          "01hours15minutes": "1 h 15 min",
+          "01hours30minutes": "1 h 30 min",
+          "01hours45minutes": "1 h 45 min",
+          "02hours00minutes": "2 h",
+          "02hours15minutes": "2 h 15 min",
+          "02hours30minutes": "2 h 30 min",
+          "02hours45minutes": "2 h 45 min",
+          "03hours00minutes": "3 h"
+        }
+      },
+      "select_coffee_default_bean_container": {
+        "name": "Standard-Bohnenbehälter",
+        "state": {
+          "mostrecentlyselectedbeancontainer": "Zuletzt verwendet",
+          "defaultbeancontainerright": "Rechts",
+          "defaultbeancontainerleft": "Links",
+          "savebeancontainerwithbeverage": "Je Getränk gespeichert"
+        }
+      },
       "select_auto_power_off": {
         "name": "Automatische Abschaltung",
         "state": {
@@ -4318,6 +4413,9 @@
     "number": {
       "number_fill_quantity": {
         "name": "Füllmenge"
+      },
+      "number_coffee_display_brightness": {
+        "name": "Displayhelligkeit"
       },
       "number_laundry_brightness": {
         "name": "Helligkeit"
