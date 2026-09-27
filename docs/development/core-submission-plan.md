@@ -1,0 +1,140 @@
+# Core submission plan
+
+This is the plan for getting Home Connect Local into Home Assistant core. It has four phases: what has to be done before the first PR, the initial submission itself, porting everything else afterwards, and what happens to this repository once everything is in core.
+
+Nothing here is scheduled yet. The first phase is blocked on a library rewrite (see [the license blocker](#1-license-the-library-blocker)), so treat this as the order of work, not a timeline.
+
+> [!NOTE]
+> Home Assistant's own rules this plan follows: the [review process](https://developers.home-assistant.io/docs/review-process/), the [integration quality scale](https://developers.home-assistant.io/docs/core/integration-quality-scale/) and the [documentation standards](https://developers.home-assistant.io/docs/documenting/standards/). Where this plan and those pages disagree, those pages win.
+
+## Phase 1: before the submission
+
+### 1. License the library (blocker)
+
+Core only accepts dependencies with an [OSI-approved license](https://opensource.org/licenses). `home-disconnect` is a fork of chris-mc1's [homeconnect_websocket](https://github.com/chris-mc1/homeconnect_websocket), which has no license at all ([upstream issue #69](https://github.com/chris-mc1/homeconnect_websocket/issues/69), open and unanswered). Without a license that code is all rights reserved, and only its author can license it. About 90% of the library's source is still his code, so the fork can't add a license by itself.
+
+The plan is **home-disconnect v2.0.0: a reimplementation that can carry a license** (MIT or Apache-2.0):
+
+- Write new code from the protocol, not by editing or translating the upstream files. Protocol facts (message format, resources, the AES and TLS-PSK schemes, handshake order) aren't copyrightable; the upstream code and its protocol document are.
+- [hcpy](https://github.com/osresearch/hcpy) is MIT and covers the crypto and websocket protocol, so it can be used with attribution. openHAB's Home Connect Direct binding is EPL-2.0: reference only, don't copy.
+- Write a new test suite too (the current one is also mostly upstream code).
+- Document the provenance in the library's repository: what came from hcpy, what from protocol observation and what was moved from this integration.
+- Keep the public API close to 1.x so this integration's migration stays small.
+
+If chris-mc1 licenses upstream before v2 lands, the rewrite becomes optional.
+
+### 2. Move protocol logic into the library
+
+Core requires code that talks to a device or service to live in the library, not the integration. v2.0.0 of both repositories moves these out of the integration:
+
+| In the integration today | Moves to |
+| --- | --- |
+| Hand-built messages: start with Finish-in (`__init__.py`), `fan.py` and `light.py` writes | Library methods (start a program with options, batch value writes) |
+| Program and option rules in `helpers.py`: locking, `ensure_writable`, full vs known option sets, unplugged probes | Library `select_program()` / `start_program()` that own these rules |
+| `hc_cloud_api.py` and `hc_legacy_oauth.py` (account sign-in and profile fetch) | One library module, something like `home_disconnect.account` (drop the "legacy" name, it's the app's own sign-in) |
+| Profile ZIP reading and writing (`config_flow.py`, `export_profile.py`, `hc_cloud_api.py`) | One library profile loader and writer (the simulator can use it too) |
+| Clock sync timestamp format | Something like `appliance.set_datetime()` |
+
+Entities, entity descriptions, the config flow UI, storage paths, the error decorator and translations stay in the integration.
+
+The integration is MIT (© chris_mc1), so code moved from here into the library is licensed. Keep the MIT notice and credit him.
+
+### 3. Library release pipeline
+
+Before the first review, the library needs:
+
+- A real CI/CD pipeline: lint, tests, type checking, and publishing to PyPI with [Trusted Publishing](https://docs.pypi.org/trusted-publishers/) from tagged GitHub releases. Reviewers check this on new dependencies.
+- The license file and PyPI license metadata.
+- A stable (non-pre-release) version for core to pin.
+- One dependency bot (keep Renovate, drop Dependabot).
+
+### 4. Decisions to make before writing the core PR
+
+| Decision | Recommendation | Why |
+| --- | --- | --- |
+| Setup path | Home Connect sign-in only; the profile ZIP upload stays custom-only | Keeps setup inside Home Assistant with no third-party desktop tool. Core `simplisafe` also signs in with its vendor app's client and a pasted redirect. |
+| Initial platform | `sensor` | Read-only, so none of the program/option write rules have to be reviewed in the first PR. Status sensors (operation state, door, remaining time) exist on nearly every appliance type. |
+| Domain | Keep `homeconnect_ws` if reviewers accept it, otherwise pick a new one early | Same domain means custom users can switch without re-adding appliances (see [Phase 4](#phase-4-after-everything-is-ported)). A new domain means everyone re-adds their appliances. `ws` is an implementation detail, so expect reviewers to question it. |
+| Config entry version | Ship core with the same `VERSION` / `MINOR_VERSION` as the custom integration's latest release | Home Assistant won't load an entry whose version is newer than the integration's. |
+| Brand | Check how the existing `home_connect` brand is listed and whether this belongs under it | Both integrations talk to the same appliances. |
+
+### 5. Things to strip from the core copy
+
+- The dev-only "setup from diagnostics dump" path: `CONF_DEV_SETUP_FROM_DUMP`, `CONF_DEV_OVERRIDE_HOST`, `CONF_DEV_OVERRIDE_PSK`, `CONFIG_SCHEMA`, the `HCConfig` / `hass.data` wiring, `process_json_file`, the `setup_from_dump` branch and the placeholder-host fallback that only exists for dump entries.
+- The profile ZIP upload step and the `file_upload` after-dependency (if the sign-in is the chosen setup path).
+- Every translation file except English: core keeps `strings.json` and translations come from Lokalise. The German requirement in this repository doesn't carry over.
+- Anything written defensively for states the data model already rules out. Reviewers ask "why can this be None?", and if the honest answer is "it can't", the code goes.
+
+### 6. Pre-flight
+
+- Run the integration against core's dev branch with core's own linters and hassfest, not only this repository's CI.
+- Check every pattern (config entry data keys, selectors, quality scale exemptions) against an existing core integration instead of guessing.
+- Give the docs page its own pass against the documentation standards. The linters don't catch broken entity references or discouraged terms.
+
+## Phase 2: the initial submission
+
+The first core PR is as small as core allows: **one platform (`sensor`), the config flow and nothing else.**
+
+### What's in it
+
+- Config flow: the Home Connect sign-in, appliance selection and connection test. Keep the test-before-setup split for washers and dryers, which cut their WiFi when off (see the `quality_scale.yaml` comment).
+- The coordinator and connection handling (push updates, heartbeat, reconnect with backoff).
+- `sensor` entities. Consider starting with a smaller set of descriptions than the custom integration's 74 (the common status sensors first) and adding the rest in follow-ups; a very large first diff is harder to review.
+- Tests with full config flow coverage, and tests for the sensor platform.
+- `quality_scale.yaml` with Bronze done and everything else marked `todo`.
+- The documentation PR on home-assistant.io, opened at the same time.
+
+### What's left out on purpose
+
+| Left out | Why |
+| --- | --- |
+| Every other platform | Initial submissions are one platform. |
+| Diagnostics | Not needed for the platform to work. |
+| Reauthentication and reconfiguration flows | Not needed for the platform to work. |
+| Options flow (Full profile export) | Not needed for the platform to work. |
+| The `start_program`, `set_start_in` and `set_finish_in` actions | No custom actions in an initial submission. |
+| Zeroconf discovery | Optional. Include only if reviewers are fine with it; otherwise it's the first follow-up. |
+
+### Timing
+
+- Base the PR on the latest core `dev` and keep it rebased. A rebase can break CI through dependency drift (ruff, mypy) even when this code didn't change; that's usually a quick mechanical fix.
+- Reviewers don't review on weekends.
+- New integrations effectively have to be merged before a release's b0 beta to ship in that release.
+
+## Phase 3: porting the rest
+
+After the initial PR is merged, everything else comes over as small follow-up PRs, one thing per PR. Each PR is tested on real appliances through a custom build of the core integration first.
+
+Suggested order:
+
+1. **Zeroconf discovery** (if it wasn't in the initial PR) and **diagnostics**.
+2. **`binary_sensor`** (75 descriptions): door, remote start allowed, problem events.
+3. **`select`** (91 descriptions): program selection and options, including locked (read-only) entities and filtering unavailable programs.
+4. **`switch`** (83) and **`number`** (34): settings and options.
+5. **`button`** (13): Start, Stop, Pause and the rest. After `select`, since starting needs a selected program.
+6. **`light`** (14) and **`fan`** (2): hood lighting and venting.
+7. **`update`** (3): software updates.
+8. **Reauthentication and reconfiguration flows.**
+9. **Start with delay:** replace the `start_program` / `set_start_in` / `set_finish_in` actions with entities if possible (for example a Start-in / Finish-in entity), since core prefers entities over integration actions. Keep an action only if an entity can't express it.
+10. **Profile export**, if it's still wanted in core.
+11. **Quality scale**: work up from Bronze to Platinum, one rule or a few related rules per PR.
+
+Features that are on the custom integration's own roadmap (for example the per-appliance option-value calibration from [discussion #104](https://github.com/vemboy200/homeconnect_local_hass/discussions/104), or a single summary problem entity) go into whichever side is current at the time. Where core's cloud `home_connect` integration has the same limitation, fixing it isn't a condition for the port.
+
+While porting, the custom integration stays the place to try new things. Anything added here before it's ported gets ported in the same way.
+
+## Phase 4: after everything is ported
+
+- **Deprecate the custom integration.** Once core has feature parity, stop adding features here and put a notice at the top of the README pointing to the core integration.
+- **Migration guide.** If the domain stayed `homeconnect_ws`, removing the custom integration from HACS and restarting keeps every config entry, device and entity, because the core integration reads the same entries and unique IDs. Document the exact steps and test them on a real install first. If the domain changed, the guide is "remove and re-add each appliance".
+- **Issues and discussions.** Point new reports to the core issue tracker. Keep this repository's issues open until the existing ones are resolved or moved.
+- **Docs.** The user-facing pages in `docs/integration/` move into the home-assistant.io integration page. Developer notes (`docs/development/`) stay here or move to the library.
+- **The library** stays maintained as a standalone project, since core depends on it. It becomes the place for protocol work.
+- **The simulator** stays a development tool. It isn't part of the core submission.
+- **Archiving** this repository is optional. Keeping it around for pre-releases of new features is fine, as long as the README makes clear core is the main version.
+
+## Open questions
+
+- Does the core review accept BSH's app client for the account sign-in? There's precedent (`simplisafe`, `roborock`), but BSH deliberately restricts the scopes for local keys to its own client.
+- Is `homeconnect_ws` acceptable as a core domain?
+- How should Home Connect Local be listed next to the existing cloud `home_connect` integration?
