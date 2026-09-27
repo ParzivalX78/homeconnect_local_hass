@@ -79,6 +79,7 @@ The first core PR is as small as core allows: **one platform (`sensor`), the con
 
 - Config flow: the Home Connect sign-in, appliance selection and connection test. Keep the test-before-setup split for washers and dryers, which cut their WiFi when off (see the `quality_scale.yaml` comment).
 - The coordinator and connection handling (push updates, heartbeat, reconnect with backoff).
+- Zeroconf discovery (`_homeconnect._tcp.local.`). Each appliance is its own config entry, so a discovered appliance that's already set up is ignored. The cloud `home_connect` integration listens for the same service type (and for DHCP), so on a fresh install both integrations can show a discovered card for the same appliance. Home Assistant allows several integrations to discover the same device, so this isn't a blocker. It's still worth saying in the PR description. Removing discovery from the cloud integration is its code owners' decision, not part of this plan.
 - `sensor` entities. Consider starting with a smaller set of descriptions than the custom integration's 74 (the common status sensors first) and adding the rest in follow-ups; a very large first diff is harder to review.
 - Tests with full config flow coverage, and tests for the sensor platform.
 - `quality_scale.yaml` with Bronze done and everything else marked `todo`.
@@ -93,7 +94,6 @@ The first core PR is as small as core allows: **one platform (`sensor`), the con
 | Reauthentication and reconfiguration flows | Not needed for the platform to work. |
 | Options flow (Full profile export) | Not needed for the platform to work. |
 | The `start_program`, `set_start_in` and `set_finish_in` actions | No custom actions in an initial submission. |
-| Zeroconf discovery | Optional. Include only if reviewers are fine with it; otherwise it's the first follow-up. |
 
 ### Timing
 
@@ -112,7 +112,7 @@ Suggested order:
    - Leave them as they are and rely on the Bosch brand plus the docs mentioning every brand.
 
    This has to come after the initial PR is merged, because hassfest checks that referenced domains exist. It doesn't block anything else, so it can run in parallel with the platform PRs.
-1. **Zeroconf discovery** (if it wasn't in the initial PR) and **diagnostics**.
+1. **Diagnostics.**
 2. **`binary_sensor`** (75 descriptions): door, remote start allowed, problem events.
 3. **`select`** (91 descriptions): program selection and options, including locked (read-only) entities and filtering unavailable programs.
 4. **`switch`** (83) and **`number`** (34): settings and options.
@@ -156,4 +156,5 @@ The docs for both integrations should explain this so people can choose.
 
 - Does the core review accept BSH's app client for the account sign-in? There's precedent (`simplisafe`, `roborock`), but BSH deliberately restricts the scopes for local keys to its own client.
 - Is `homeconnect_ws` acceptable as a core domain?
+- Are reviewers fine with both integrations discovering the same appliances?
 - How should the 8 BSH brand virtual integrations (Siemens, Thermador, Neff and so on) point to both integrations?
