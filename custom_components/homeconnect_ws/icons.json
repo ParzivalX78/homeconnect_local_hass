@@ -59,6 +59,9 @@
             "switch_cup_warmer": {
                 "default": "mdi:heat-wave"
             },
+            "switch_coffee_leave_profiles_automatically": {
+                "default": "mdi:account-arrow-right"
+            },
             "switch_allow_backend_connection": {
                 "default": "mdi:cloud"
             },
@@ -439,6 +442,27 @@
             "select_cups": {
                 "default": "mdi:coffee"
             },
+            "select_coffee_switch_off_after": {
+                "default": "mdi:timer-off-outline"
+            },
+            "select_coffee_water_hardness": {
+                "default": "mdi:water-circle"
+            },
+            "select_coffee_user_mode": {
+                "default": "mdi:account-cog"
+            },
+            "select_coffee_milk_order": {
+                "default": "mdi:swap-vertical"
+            },
+            "select_coffee_macchiato_pause": {
+                "default": "mdi:timer-pause-outline"
+            },
+            "select_coffee_milk_reminder": {
+                "default": "mdi:bell-ring-outline"
+            },
+            "select_coffee_default_bean_container": {
+                "default": "mdi:seed"
+            },
             "select_remote_control_level": {
                 "default": "mdi:remote",
                 "state": {
@@ -555,6 +579,9 @@
         },
         "number": {
             "number_fill_quantity": {},
+            "number_coffee_display_brightness": {
+                "default": "mdi:brightness-6"
+            },
             "number_idos1_base_level": {
                 "default": "mdi:tune"
             },

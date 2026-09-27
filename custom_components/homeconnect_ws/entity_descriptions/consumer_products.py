@@ -8,7 +8,7 @@ from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.components.number import NumberDeviceClass, NumberMode
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.components.switch import SwitchDeviceClass
-from homeassistant.const import UnitOfVolume
+from homeassistant.const import EntityCategory, UnitOfVolume
 
 from .descriptions_definitions import (
     HCBinarySensorEntityDescription,
@@ -125,6 +125,52 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             device_class=SensorDeviceClass.ENUM,
             has_state_translation=True,
         ),
+        HCSelectEntityDescription(
+            key="select_coffee_switch_off_after",
+            entity="ConsumerProducts.CoffeeMaker.Setting.SwitchOffAfter",
+            entity_category=EntityCategory.CONFIG,
+            has_state_translation=True,
+        ),
+        HCSelectEntityDescription(
+            key="select_coffee_water_hardness",
+            entity="ConsumerProducts.CoffeeMaker.Setting.WaterHardness",
+            entity_category=EntityCategory.CONFIG,
+            has_state_translation=True,
+        ),
+        HCSelectEntityDescription(
+            key="select_coffee_user_mode",
+            entity="ConsumerProducts.CoffeeMaker.Setting.UserMode",
+            entity_category=EntityCategory.CONFIG,
+            has_state_translation=True,
+        ),
+        HCSelectEntityDescription(
+            key="select_coffee_milk_order",
+            entity="ConsumerProducts.CoffeeMaker.Setting.CoffeeMilkOrder",
+            entity_category=EntityCategory.CONFIG,
+            entity_registry_enabled_default=False,
+            has_state_translation=True,
+        ),
+        HCSelectEntityDescription(
+            key="select_coffee_macchiato_pause",
+            entity="ConsumerProducts.CoffeeMaker.Setting.MacchiatoPause",
+            entity_category=EntityCategory.CONFIG,
+            entity_registry_enabled_default=False,
+            has_state_translation=True,
+        ),
+        HCSelectEntityDescription(
+            key="select_coffee_milk_reminder",
+            entity="ConsumerProducts.CoffeeMaker.Setting.RemindForMilkAfter",
+            entity_category=EntityCategory.CONFIG,
+            entity_registry_enabled_default=False,
+            has_state_translation=True,
+        ),
+        HCSelectEntityDescription(
+            key="select_coffee_default_bean_container",
+            entity="ConsumerProducts.CoffeeMaker.Setting.DefaultBeanContainerSelection",
+            entity_category=EntityCategory.CONFIG,
+            entity_registry_enabled_default=False,
+            has_state_translation=True,
+        ),
     ],
     "switch": [
         HCSwitchEntityDescription(
@@ -137,6 +183,13 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             entity="ConsumerProducts.CoffeeMaker.Setting.CupWarmer",
             device_class=SwitchDeviceClass.SWITCH,
         ),
+        HCSwitchEntityDescription(
+            key="switch_coffee_leave_profiles_automatically",
+            entity="ConsumerProducts.CoffeeMaker.Setting.LeaveProfilesAutomatically",
+            device_class=SwitchDeviceClass.SWITCH,
+            entity_category=EntityCategory.CONFIG,
+            entity_registry_enabled_default=False,
+        ),
     ],
     "number": [
         HCNumberEntityDescription(
@@ -145,7 +198,14 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             device_class=NumberDeviceClass.VOLUME,
             native_unit_of_measurement=UnitOfVolume.MILLILITERS,
             mode=NumberMode.BOX,
-        )
+        ),
+        HCNumberEntityDescription(
+            key="number_coffee_display_brightness",
+            entity="ConsumerProducts.CoffeeMaker.Setting.BrightnessDisplay",
+            entity_category=EntityCategory.CONFIG,
+            entity_registry_enabled_default=False,
+            mode=NumberMode.AUTO,
+        ),
     ],
     "sensor": [
         HCSensorEntityDescription(

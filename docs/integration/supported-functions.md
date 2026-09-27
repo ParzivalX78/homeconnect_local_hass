@@ -159,6 +159,9 @@ Some entites are excluded from this integration on purpose, even though the Home
   - Milk-to-coffee ratio for milk-based drinks
 - Cup warmer
   - Turn the cup warmer plate on or off
+- Appliance settings
+  - Switch off after, water hardness, user mode (Standard/Barista)
+  - Disabled by default: display brightness, cappuccino sequence, latte macchiato pause, milk reminder, default bean container, leave profiles automatically
 - Maintenance countdowns
   - Cleaning, descaling, water filter replacement
 - Water tank and drip tray level sensors
