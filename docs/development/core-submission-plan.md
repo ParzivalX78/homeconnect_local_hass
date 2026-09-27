@@ -54,7 +54,7 @@ Before the first review, the library needs:
 | --- | --- | --- |
 | Setup path | Home Connect sign-in only; the profile ZIP upload stays custom-only | Keeps setup inside Home Assistant with no third-party desktop tool. Core `simplisafe` also signs in with its vendor app's client and a pasted redirect. |
 | Initial platform | `sensor` | Read-only, so none of the program/option write rules have to be reviewed in the first PR. Status sensors (operation state, door, remaining time) exist on nearly every appliance type. |
-| Domain | Keep `homeconnect_ws` if reviewers accept it, otherwise pick a new one early | Same domain means custom users can switch without re-adding appliances (see [Phase 4](#phase-4-after-everything-is-ported)). A new domain means everyone re-adds their appliances. `ws` is an implementation detail, so expect reviewers to question it. |
+| Domain | Keep `homeconnect_ws` if reviewers accept it, otherwise pick a new one early | Same domain means custom users can switch without re-adding appliances (see [Phase 4](#phase-4-after-everything-is-ported)). A new domain means everyone re-adds their appliances. `ws` is an implementation detail, so expect reviewers to question it. If it has to change, `home_connect_local` follows core's `powerfox` / `powerfox_local` naming ("Powerfox Cloud" and "Powerfox Local", grouped under one Powerfox brand). |
 | Config entry version | Ship core with the same `VERSION` / `MINOR_VERSION` as the custom integration's latest release | Home Assistant won't load an entry whose version is newer than the integration's. |
 | Brand | Add the domain to core's existing Bosch brand (`homeassistant/brands/bosch.json`) | Core lists `home_connect` under Bosch, next to `bosch_alarm` and `bosch_shc`, so the local integration belongs in the same brand. There's no Siemens, Thermador or other BSH brand file to add it to. |
 
@@ -79,7 +79,7 @@ The first core PR is as small as core allows: **one platform (`sensor`), the con
 
 - Config flow: the Home Connect sign-in, appliance selection and connection test. Keep the test-before-setup split for washers and dryers, which cut their WiFi when off (see the `quality_scale.yaml` comment).
 - The coordinator and connection handling (push updates, heartbeat, reconnect with backoff).
-- Zeroconf discovery (`_homeconnect._tcp.local.`). Each appliance is its own config entry, so a discovered appliance that's already set up is ignored. The cloud `home_connect` integration listens for the same service type (and for DHCP), so on a fresh install both integrations can show a discovered card for the same appliance. Home Assistant allows several integrations to discover the same device, so this isn't a blocker. It's still worth saying in the PR description. Removing discovery from the cloud integration is its code owners' decision, not part of this plan.
+- Zeroconf discovery (`_homeconnect._tcp.local.`). Each appliance is its own config entry, so a discovered appliance that's already set up is ignored. The cloud `home_connect` integration listens for the same service type (and for DHCP), so on a fresh install both integrations can show a discovered card for the same appliance. That's accepted in core: `powerfox` (cloud) and `powerfox_local` both discover the same poweropti devices with the same zeroconf matcher, and both mark `discovery` as done. It's still worth saying in the PR description. Removing discovery from the cloud integration is its code owners' decision, not part of this plan.
 - `sensor` entities. Consider starting with a smaller set of descriptions than the custom integration's 74 (the common status sensors first) and adding the rest in follow-ups; a very large first diff is harder to review.
 - Tests with full config flow coverage, and tests for the sensor platform.
 - `quality_scale.yaml` with Bronze done and everything else marked `todo`.
@@ -156,5 +156,4 @@ The docs for both integrations should explain this so people can choose.
 
 - Does the core review accept BSH's app client for the account sign-in? There's precedent (`simplisafe`, `roborock`), but BSH deliberately restricts the scopes for local keys to its own client.
 - Is `homeconnect_ws` acceptable as a core domain?
-- Are reviewers fine with both integrations discovering the same appliances?
 - How should the 8 BSH brand virtual integrations (Siemens, Thermador, Neff and so on) point to both integrations?
