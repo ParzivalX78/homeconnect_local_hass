@@ -7,6 +7,57 @@ Nothing here is scheduled yet. The first phase is blocked on a library rewrite (
 > [!NOTE]
 > Home Assistant's own rules this plan follows: the [review process](https://developers.home-assistant.io/docs/review-process/), the [integration quality scale](https://developers.home-assistant.io/docs/core/integration-quality-scale/) and the [documentation standards](https://developers.home-assistant.io/docs/documenting/standards/). Where this plan and those pages disagree, those pages win.
 
+## Current size
+
+Entity descriptions in `entity_descriptions/`, counted on `dev` on 2026-09-27 (after #117). This number changes with almost every feature PR, so recount before relying on it.
+
+| Platform | Descriptions | Without repeats |
+| --- | --- | --- |
+| `sensor` | 73 | 71 |
+| `binary_sensor` | 74 | 64 |
+| `switch` | 83 | 74 |
+| `select` | 97 | 97 |
+| `number` | 34 | 32 |
+| `button` | 12 | 12 |
+| `light` | 13 | 7 |
+| `fan` | 1 | 1 |
+| `update` | 2 | 2 |
+| **Total** | **389** | **360** |
+
+- **Descriptions** is every `HC*EntityDescription(...)` in the code.
+- **Without repeats** counts each key once. Repeats are the same entity described twice: appliance variants (for example the hood lights), Celsius/Fahrenheit pairs, and the old and new names for the same fridge and washer features that v2.0.0's entity cleanup will merge.
+- Neither is the number of entities one appliance gets. An appliance only gets the descriptions it reports, and a few descriptions (oven cavities, hob zones) create one entity per cavity or zone.
+
+<details>
+<summary>Recount</summary>
+
+Run from the repository root:
+
+```python
+import glob
+import re
+
+files = [
+    f
+    for f in glob.glob("custom_components/homeconnect_ws/entity_descriptions/*.py")
+    if not f.endswith(("__init__.py", "descriptions_definitions.py"))
+]
+for kind in ["Sensor", "BinarySensor", "Switch", "Select", "Number", "Button", "Light", "Fan", "Update"]:
+    total, keys, unnamed = 0, set(), 0
+    for f in files:
+        src = open(f).read()
+        for match in re.finditer(rf"HC{kind}EntityDescription\(", src):
+            total += 1
+            key = re.match(r'\s*key="([^"]+)"', src[match.end():])
+            if key:
+                keys.add(key.group(1))
+            else:
+                unnamed += 1
+    print(kind, total, len(keys) + unnamed)
+```
+
+</details>
+
 ## Phase 1: before the submission (the library)
 
 ### 1. License the library (blocker)
@@ -115,11 +166,11 @@ Suggested order (description counts are how many entity descriptions each platfo
 3. **`binary_sensor`** (74 descriptions), split in two:
    - shared, dishwasher and laundry (43): remote start allowed, door, dishwasher and laundry problem events;
    - refrigeration, cooking and coffee makers (31): mostly the fridge and freezer door and alarm sensors.
-4. **`select`** (90 descriptions, each a separate entity; the dropdown values aren't counted): program selection and options, including locked (read-only) entities and filtering unavailable programs.
-5. **`switch`** (82 descriptions), split in two:
+4. **`select`** (97 descriptions, each a separate entity; the dropdown values aren't counted): program selection and options, including locked (read-only) entities and filtering unavailable programs.
+5. **`switch`** (83 descriptions), split in two:
    - shared, dishwasher and laundry (50);
-   - cooking, refrigeration and coffee makers (32).
-6. **`number`** (33): settings and options.
+   - cooking, refrigeration and coffee makers (33).
+6. **`number`** (34): settings and options.
 7. **`button`** (12): Start, Stop, Pause and the rest. After `select`, since starting needs a selected program.
 8. **`light`** (13) and **`fan`** (1): hood lighting and venting.
 9. **`update`** (2): software updates.
