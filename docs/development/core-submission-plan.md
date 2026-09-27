@@ -119,7 +119,7 @@ Suggested order:
 5. **`button`** (13): Start, Stop, Pause and the rest. After `select`, since starting needs a selected program.
 6. **`light`** (14) and **`fan`** (2): hood lighting and venting.
 7. **`update`** (3): software updates.
-8. **Reauthentication and reconfiguration flows.** Reauthentication is the only Silver rule left, and reconfiguration plus diagnostics are the only Gold ones, so these PRs move the manifest from Bronze straight up: Silver once reauthentication lands, then Platinum once reconfiguration and diagnostics are both in (the Platinum rules are already done). That's two or three level bumps instead of climbing one rule at a time.
+8. **Reauthentication and reconfiguration flows.** Reauthentication is the only Silver rule left, and reconfiguration plus diagnostics are the only Gold ones, so these PRs move the manifest from Bronze straight up: Silver once reauthentication lands, then Platinum once reconfiguration and diagnostics are both in (the Platinum rules are already done). That's two level changes (Bronze to Silver, Silver to Platinum) instead of a long climb.
 9. **Start with delay:** replace the `start_program` / `set_start_in` / `set_finish_in` actions with entities if possible (for example a Start-in / Finish-in entity), since core prefers entities over integration actions. Keep an action only if an entity can't express it.
 10. **Profile export**, if it's still wanted in core.
 
