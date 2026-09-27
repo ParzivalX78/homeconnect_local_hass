@@ -1,13 +1,13 @@
 # Core submission plan
 
-This is the plan for getting Home Connect Local into Home Assistant core. It has four phases: what has to be done before the first PR, the initial submission itself, porting everything else afterwards, and what happens to this repository once everything is in core.
+This is the plan for getting Home Connect Local into Home Assistant core. It has four phases: what has to be done in the library before the first PR, the initial submission itself, porting everything else afterwards, and what happens to this repository once everything is in core.
 
 Nothing here is scheduled yet. The first phase is blocked on a library rewrite (see [the license blocker](#1-license-the-library-blocker)), so treat this as the order of work, not a timeline.
 
 > [!NOTE]
 > Home Assistant's own rules this plan follows: the [review process](https://developers.home-assistant.io/docs/review-process/), the [integration quality scale](https://developers.home-assistant.io/docs/core/integration-quality-scale/) and the [documentation standards](https://developers.home-assistant.io/docs/documenting/standards/). Where this plan and those pages disagree, those pages win.
 
-## Phase 1: before the submission
+## Phase 1: before the submission (the library)
 
 ### 1. License the library (blocker)
 
@@ -48,7 +48,11 @@ Before the first review, the library needs:
 - A stable (non-pre-release) version for core to pin.
 - One dependency bot (keep Renovate, drop Dependabot).
 
-### 4. Decisions to make before writing the core PR
+## Phase 2: the initial submission
+
+The first core PR is as small as core allows: **one platform (`sensor`), the config flow and nothing else.**
+
+### Decisions to make first
 
 | Decision | Recommendation | Why |
 | --- | --- | --- |
@@ -57,23 +61,6 @@ Before the first review, the library needs:
 | Domain | Keep `homeconnect_ws` if reviewers accept it, otherwise pick a new one early | Same domain means custom users can switch without re-adding appliances (see [Phase 4](#phase-4-after-everything-is-ported)). A new domain means everyone re-adds their appliances. `ws` is an implementation detail, so expect reviewers to question it. If it has to change, `home_connect_local` follows core's `powerfox` / `powerfox_local` naming ("Powerfox Cloud" and "Powerfox Local", grouped under one Powerfox brand). |
 | Config entry version | Ship core with the same `VERSION` / `MINOR_VERSION` as the custom integration's latest release | Home Assistant won't load an entry whose version is newer than the integration's. |
 | Brand | Add the domain to core's existing Bosch brand (`homeassistant/brands/bosch.json`) | Core lists `home_connect` under Bosch, next to `bosch_alarm` and `bosch_shc`, so the local integration belongs in the same brand. There's no Siemens, Thermador or other BSH brand file to add it to. |
-
-### 5. Things to strip from the core copy
-
-- The dev-only "setup from diagnostics dump" path: `CONF_DEV_SETUP_FROM_DUMP`, `CONF_DEV_OVERRIDE_HOST`, `CONF_DEV_OVERRIDE_PSK`, `CONFIG_SCHEMA`, the `HCConfig` / `hass.data` wiring, `process_json_file`, the `setup_from_dump` branch and the placeholder-host fallback that only exists for dump entries.
-- The profile ZIP upload step and the `file_upload` after-dependency (if the sign-in is the chosen setup path).
-- Every translation file except English: core keeps `strings.json` and translations come from Lokalise. The German requirement in this repository doesn't carry over.
-- Anything written defensively for states the data model already rules out. Reviewers ask "why can this be None?", and if the honest answer is "it can't", the code goes.
-
-### 6. Pre-flight
-
-- Run the integration against core's dev branch with core's own linters and hassfest, not only this repository's CI.
-- Check every pattern (config entry data keys, selectors, quality scale exemptions) against an existing core integration instead of guessing.
-- Give the docs page its own pass against the documentation standards. The linters don't catch broken entity references or discouraged terms.
-
-## Phase 2: the initial submission
-
-The first core PR is as small as core allows: **one platform (`sensor`), the config flow and nothing else.**
 
 ### What's in it
 
@@ -94,6 +81,19 @@ The first core PR is as small as core allows: **one platform (`sensor`), the con
 | Reauthentication and reconfiguration flows | Not needed for the platform to work. |
 | Options flow (Full profile export) | Not needed for the platform to work. |
 | The `start_program`, `set_start_in` and `set_finish_in` actions | No custom actions in an initial submission. |
+
+### Things to strip from the core copy
+
+- The dev-only "setup from diagnostics dump" path: `CONF_DEV_SETUP_FROM_DUMP`, `CONF_DEV_OVERRIDE_HOST`, `CONF_DEV_OVERRIDE_PSK`, `CONFIG_SCHEMA`, the `HCConfig` / `hass.data` wiring, `process_json_file`, the `setup_from_dump` branch and the placeholder-host fallback that only exists for dump entries.
+- The profile ZIP upload step and the `file_upload` after-dependency (if the sign-in is the chosen setup path).
+- Every translation file except English: core keeps `strings.json` and translations come from Lokalise. The German requirement in this repository doesn't carry over.
+- Anything written defensively for states the data model already rules out. Reviewers ask "why can this be None?", and if the honest answer is "it can't", the code goes.
+
+### Pre-flight
+
+- Run the integration against core's dev branch with core's own linters and hassfest, not only this repository's CI.
+- Check every pattern (config entry data keys, selectors, quality scale exemptions) against an existing core integration instead of guessing.
+- Give the docs page its own pass against the documentation standards. The linters don't catch broken entity references or discouraged terms.
 
 ### Timing
 
