@@ -56,7 +56,7 @@ The first core PR is as small as core allows: **one platform (`sensor`), the con
 
 | Decision | Recommendation | Why |
 | --- | --- | --- |
-| Setup path | Home Connect sign-in only; the profile ZIP upload stays custom-only | Keeps setup inside Home Assistant with no third-party desktop tool. Core `simplisafe` also signs in with its vendor app's client and a pasted redirect. |
+| Setup path | Home Connect sign-in only in the initial PR; the profile ZIP upload can follow later (Phase 3) | Keeps setup inside Home Assistant with no third-party desktop tool. Core `simplisafe` also signs in with its vendor app's client and a pasted redirect. |
 | Initial platform | `sensor` | Read-only, so none of the program/option write rules have to be reviewed in the first PR. Status sensors (operation state, door, remaining time) exist on nearly every appliance type. |
 | Domain | Keep `homeconnect_ws` if reviewers accept it, otherwise pick a new one early | Same domain means custom users can switch without re-adding appliances (see [Phase 4](#phase-4-after-everything-is-ported)). A new domain means everyone re-adds their appliances. `ws` is an implementation detail, so expect reviewers to question it. If it has to change, `home_connect_local` follows core's `powerfox` / `powerfox_local` naming ("Powerfox Cloud" and "Powerfox Local", grouped under one Powerfox brand). |
 | Config entry version | Ship core with the same `VERSION` / `MINOR_VERSION` as the custom integration's latest release | Home Assistant won't load an entry whose version is newer than the integration's. |
@@ -87,7 +87,7 @@ The first core PR is as small as core allows: **one platform (`sensor`), the con
 ### Things to strip from the core copy
 
 - The dev-only "setup from diagnostics dump" path: `CONF_DEV_SETUP_FROM_DUMP`, `CONF_DEV_OVERRIDE_HOST`, `CONF_DEV_OVERRIDE_PSK`, `CONFIG_SCHEMA`, the `HCConfig` / `hass.data` wiring, `process_json_file`, the `setup_from_dump` branch and the placeholder-host fallback that only exists for dump entries.
-- The profile ZIP upload step and the `file_upload` after-dependency (if the sign-in is the chosen setup path).
+- The profile ZIP upload step and the `file_upload` after-dependency (if the sign-in is the chosen setup path). It can come back as a follow-up, see Phase 3.
 - Every translation file except English: core keeps `strings.json` and translations come from Lokalise. The German requirement in this repository doesn't carry over.
 - Anything written defensively for states the data model already rules out. Reviewers ask "why can this be None?", and if the honest answer is "it can't", the code goes.
 
@@ -126,8 +126,11 @@ Suggested order (description counts are how many entity descriptions each platfo
 9. **`update`** (2): software updates.
 10. **Reconfiguration flow, then reauthentication flow last.** Reconfiguration covers what changes in normal use (the appliance's address, or a new profile after a firmware update adds options). Reauthentication is only needed when the local key changes, which only happens when the appliance is unpaired and paired again, so it's the least urgent. Reauthentication is also the only Silver rule left, so the manifest stays at Bronze until it lands and then goes straight to Platinum: diagnostics and reconfiguration are the only Gold rules left and will already be in, and the Platinum rules are already done.
 11. **Start with delay:** replace the `start_program` / `set_start_in` / `set_finish_in` actions with entities if possible (for example a Start-in / Finish-in entity), since core prefers entities over integration actions. Keep an action only if an entity can't express it.
-12. **Profile export**, if it's still wanted in core.
-13. **The other BSH brands (nice to have).** Core has 8 virtual integrations that point people searching for another BSH brand to the cloud `home_connect` integration: Balay, Constructa, Gaggenau, Neff, Pitsos, Profilo, Siemens and Thermador. Each is a manifest with `"integration_type": "virtual"` and `"supported_by": "home_connect"`, and `supported_by` takes a single domain, so they can't also point to this integration. Someone searching "Thermador" or "Siemens" would only find the cloud integration. Options, to settle with reviewers:
+12. **Full profile export**, if core allows an integration to write a file containing the local key (not confirmed yet). The safe export needs nothing extra: it's Home Assistant's own Download Diagnostics. Two ways to offer the full one:
+   - As it works now: a "Configure" (options flow) step that writes the ZIP to the config directory after an explicit confirmation.
+   - As an integration action that writes the file. Core's `camera.snapshot` is a precedent for an action writing a file, limited to the directories allowed by `allowlist_external_dirs`. This brings back `action-setup` and `docs-actions`, so they'd go from exempt to done.
+13. **Profile ZIP upload as a second setup path**, if reviewers accept two ways to set up. It's the fallback for anyone who can't or doesn't want to use the Home Connect sign-in, and the way to set up if BSH ever blocks the sign-in client. Core `knx` accepts an uploaded keyring file as precedent. The reconfiguration flow's "update profile file" option uses the same upload, so if this is rejected, reconfiguration only offers a profile refresh through the sign-in.
+14. **The other BSH brands (nice to have).** Core has 8 virtual integrations that point people searching for another BSH brand to the cloud `home_connect` integration: Balay, Constructa, Gaggenau, Neff, Pitsos, Profilo, Siemens and Thermador. Each is a manifest with `"integration_type": "virtual"` and `"supported_by": "home_connect"`, and `supported_by` takes a single domain, so they can't also point to this integration. Someone searching "Thermador" or "Siemens" would only find the cloud integration. Options, to settle with reviewers:
    - Turn each of them into a brand (`homeassistant/brands/siemens.json` and so on) that lists both `home_connect` and this integration, the same way `bosch.json` lists several. This is a change to how the cloud integration is presented, so its code owners should agree.
    - Leave them as they are and rely on the Bosch brand plus the docs mentioning every brand.
 
