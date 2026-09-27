@@ -26,6 +26,7 @@ Entity descriptions in `entity_descriptions/`, counted on `dev` on 2026-09-27 (a
 
 - **Descriptions** is every `HC*EntityDescription(...)` in the code.
 - **Without repeats** counts each key once. Repeats are the same entity described twice: appliance variants (for example the hood lights), Celsius/Fahrenheit pairs, and the old and new names for the same fridge and washer features that v2.0.0's entity cleanup will merge.
+- After v2.0.0's entity cleanup merges the old and new names, drop the **Without repeats** column and keep one count.
 - Neither is the number of entities one appliance gets. An appliance only gets the descriptions it reports, and a few descriptions (oven cavities, hob zones) create one entity per cavity or zone.
 
 <details>
@@ -158,6 +159,25 @@ The first core PR is as small as core allows: **one platform (`sensor`), the con
 After the initial PR is merged, everything else comes over as small follow-up PRs, one thing per PR. Each PR is tested on real appliances through a custom build of the core integration first.
 
 Expect 15-23 core PRs including the initial one (the range depends on whether the sensor fallback is used, whether `select` and `light`/`fan` need splitting, and whether the full profile export and profile upload are accepted). On top of that come a matching home-assistant.io docs PR for most of them, a standalone PR for each library bump, and the brand PRs. The target is **3-5 months from the initial PR's merge**, based on the PowerShades submission. That doesn't include the library rewrite (Phase 1) or the initial review itself, which is usually the slowest part. Hitting it means keeping independent PRs open in parallel (for example diagnostics, the brand PRs and `update`) instead of waiting for each merge before opening the next.
+
+### Porting progress
+
+Start tracking this once the initial PR is merged, and update it with every follow-up PR. **In core** is how many of the custom integration's descriptions the core integration has; the bar is that as a share of the total.
+
+| Platform | Custom | In core | Progress |
+| --- | --- | --- | --- |
+| `sensor` | 73 | 0 | `░░░░░░░░░░` 0% |
+| `binary_sensor` | 74 | 0 | `░░░░░░░░░░` 0% |
+| `switch` | 83 | 0 | `░░░░░░░░░░` 0% |
+| `select` | 97 | 0 | `░░░░░░░░░░` 0% |
+| `number` | 34 | 0 | `░░░░░░░░░░` 0% |
+| `button` | 12 | 0 | `░░░░░░░░░░` 0% |
+| `light` | 13 | 0 | `░░░░░░░░░░` 0% |
+| `fan` | 1 | 0 | `░░░░░░░░░░` 0% |
+| `update` | 2 | 0 | `░░░░░░░░░░` 0% |
+| **Total** | **389** | **0** | `░░░░░░░░░░` **0%** |
+
+Each `█` is 10%. Take the **Custom** column from [Current size](#current-size) at the time (after v2.0.0 that's the count without duplicates), since the custom integration keeps changing while the port runs.
 
 Suggested order (description counts are how many entity descriptions each platform has; one appliance only gets the ones it reports):
 
