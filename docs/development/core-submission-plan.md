@@ -107,6 +107,11 @@ After the initial PR is merged, everything else comes over as small follow-up PR
 
 Suggested order:
 
+0. **The other BSH brands.** Core has 8 virtual integrations that point people searching for another BSH brand to the cloud `home_connect` integration: Balay, Constructa, Gaggenau, Neff, Pitsos, Profilo, Siemens and Thermador. Each is a manifest with `"integration_type": "virtual"` and `"supported_by": "home_connect"`, and `supported_by` takes a single domain, so they can't also point to this integration. Someone searching "Thermador" or "Siemens" would only find the cloud integration. Options, to settle with reviewers:
+   - Turn each of them into a brand (`homeassistant/brands/siemens.json` and so on) that lists both `home_connect` and this integration, the same way `bosch.json` lists several. This is a change to how the cloud integration is presented, so its code owners should agree.
+   - Leave them as they are and rely on the Bosch brand plus the docs mentioning every brand.
+
+   This has to come after the initial PR is merged, because hassfest checks that referenced domains exist. It doesn't block anything else, so it can run in parallel with the platform PRs.
 1. **Zeroconf discovery** (if it wasn't in the initial PR) and **diagnostics**.
 2. **`binary_sensor`** (75 descriptions): door, remote start allowed, problem events.
 3. **`select`** (91 descriptions): program selection and options, including locked (read-only) entities and filtering unavailable programs.
@@ -137,3 +142,4 @@ While porting, the custom integration stays the place to try new things. Anythin
 
 - Does the core review accept BSH's app client for the account sign-in? There's precedent (`simplisafe`, `roborock`), but BSH deliberately restricts the scopes for local keys to its own client.
 - Is `homeconnect_ws` acceptable as a core domain?
+- How should the 8 BSH brand virtual integrations (Siemens, Thermador, Neff and so on) point to both integrations?
