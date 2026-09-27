@@ -56,7 +56,7 @@ Before the first review, the library needs:
 | Initial platform | `sensor` | Read-only, so none of the program/option write rules have to be reviewed in the first PR. Status sensors (operation state, door, remaining time) exist on nearly every appliance type. |
 | Domain | Keep `homeconnect_ws` if reviewers accept it, otherwise pick a new one early | Same domain means custom users can switch without re-adding appliances (see [Phase 4](#phase-4-after-everything-is-ported)). A new domain means everyone re-adds their appliances. `ws` is an implementation detail, so expect reviewers to question it. |
 | Config entry version | Ship core with the same `VERSION` / `MINOR_VERSION` as the custom integration's latest release | Home Assistant won't load an entry whose version is newer than the integration's. |
-| Brand | Check how the existing `home_connect` brand is listed and whether this belongs under it | Both integrations talk to the same appliances. |
+| Brand | Add the domain to core's existing Bosch brand (`homeassistant/brands/bosch.json`) | Core lists `home_connect` under Bosch, next to `bosch_alarm` and `bosch_shc`, so the local integration belongs in the same brand. There's no Siemens, Thermador or other BSH brand file to add it to. |
 
 ### 5. Things to strip from the core copy
 
@@ -137,4 +137,3 @@ While porting, the custom integration stays the place to try new things. Anythin
 
 - Does the core review accept BSH's app client for the account sign-in? There's precedent (`simplisafe`, `roborock`), but BSH deliberately restricts the scopes for local keys to its own client.
 - Is `homeconnect_ws` acceptable as a core domain?
-- How should Home Connect Local be listed next to the existing cloud `home_connect` integration?
