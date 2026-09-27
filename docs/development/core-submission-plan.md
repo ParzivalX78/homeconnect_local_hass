@@ -59,7 +59,6 @@ The first core PR is as small as core allows: **one platform (`sensor`), the con
 | Setup path | Home Connect sign-in only in the initial PR; the profile ZIP upload can follow later (Phase 3) | Keeps setup inside Home Assistant with no third-party desktop tool. Core `simplisafe` also signs in with its vendor app's client and a pasted redirect. |
 | Initial platform | `sensor` | Read-only, so none of the program/option write rules have to be reviewed in the first PR. Status sensors (operation state, door, remaining time) exist on nearly every appliance type. |
 | Domain | Keep `homeconnect_ws` if reviewers accept it, otherwise pick a new one early | Same domain means custom users can switch without re-adding appliances (see [Phase 4](#phase-4-after-everything-is-ported)). A new domain means everyone re-adds their appliances. `ws` is an implementation detail, so expect reviewers to question it. If it has to change, `home_connect_local` follows core's `powerfox` / `powerfox_local` naming ("Powerfox Cloud" and "Powerfox Local", grouped under one Powerfox brand). |
-| Config entry version | Ship core with the same `VERSION` / `MINOR_VERSION` as the custom integration's latest release | Home Assistant won't load an entry whose version is newer than the integration's. |
 | Brand | Add the domain to core's existing Bosch brand (`homeassistant/brands/bosch.json`) | Core lists `home_connect` under Bosch, next to `bosch_alarm` and `bosch_shc`, so the local integration belongs in the same brand. There's no Siemens, Thermador or other BSH brand file to add it to. |
 
 ### What's in it
@@ -143,7 +142,7 @@ While porting, the custom integration stays the place to try new things. Anythin
 ## Phase 4: after everything is ported
 
 - **Deprecate the custom integration.** Once core has feature parity, stop adding features here and put a notice at the top of the README pointing to the core integration.
-- **Migration guide.** If the domain stayed `homeconnect_ws`, removing the custom integration from HACS and restarting keeps every config entry, device and entity, because the core integration reads the same entries and unique IDs. Document the exact steps and test them on a real install first. If the domain changed, the guide is "remove and re-add each appliance".
+- **Migration guide.** If the domain stayed `homeconnect_ws`, removing the custom integration from HACS and restarting keeps every config entry, device and entity, because the core integration reads the same entries and unique IDs. This only works if core's config entry `VERSION` is at least the custom integration's (currently 2): Home Assistant refuses to load an entry created by a newer version than the integration it's loading into. Document the exact steps and test them on a real install first. If the domain changed, the guide is "remove and re-add each appliance".
 - **Issues and discussions.** Point new reports to the core issue tracker. Keep this repository's issues open until the existing ones are resolved or moved.
 - **Docs.** The user-facing pages in `docs/integration/` move into the home-assistant.io integration page. Developer notes (`docs/development/`) stay here or move to the library.
 - **The library** stays maintained as a standalone project, since core depends on it. It becomes the place for protocol work.
