@@ -67,7 +67,8 @@ The first core PR is as small as core allows: **one platform (`sensor`), the con
 - Config flow: the Home Connect sign-in, appliance selection and connection test. Keep the test-before-setup split for washers and dryers, which cut their WiFi when off (see the `quality_scale.yaml` comment).
 - The coordinator and connection handling (push updates, heartbeat, reconnect with backoff).
 - Zeroconf discovery (`_homeconnect._tcp.local.`). Each appliance is its own config entry, so a discovered appliance that's already set up is ignored. The cloud `home_connect` integration listens for the same service type (and for DHCP), so on a fresh install both integrations can show a discovered card for the same appliance. That's accepted in core: `powerfox` (cloud) and `powerfox_local` both discover the same poweropti devices with the same zeroconf matcher, and both mark `discovery` as done. It's still worth saying in the PR description. Removing discovery from the cloud integration is its code owners' decision, not part of this plan.
-- `sensor` entities. Consider starting with a smaller set of descriptions than the custom integration's 74 (the common status sensors first) and adding the rest in follow-ups; a very large first diff is harder to review.
+- `sensor` entities, without the diagnostic ones. The custom integration has 74 sensor descriptions, and 9 of them are diagnostic: WiFi signal strength, IPv4 and IPv6 address, water and energy forecast, started and completed program counts, the program end trigger and the dishwasher's machine care reminder. Leaving them out also leaves out the WiFi signal sensor, the only entity that polls (`/ni/info`), so the first PR is push-only.
+  - That still leaves 65. If reviewers want it smaller, the next cut is the ~20 sensors that are disabled by default (mostly the coffee maker's beverage counters and care countdowns).
 - Tests with full config flow coverage, and tests for the sensor platform.
 - The quality scale as far as the initial PR allows. Everything the custom integration already meets stays `done`, except the three rules for features left out of the initial PR: `diagnostics`, `reauthentication-flow` and `reconfiguration-flow` are `todo`. `dynamic-devices` and `stale-devices` stay exempt (one appliance per config entry). Rules about actions (`action-setup`, `docs-actions`) become exempt while there are no integration actions, and the rest are checked against the `sensor` platform alone. Because `reauthentication-flow` is a Silver rule, the manifest still declares **Bronze** at first, even though nearly every Silver, Gold and Platinum rule is already done.
 - The documentation PR on home-assistant.io, opened at the same time.
@@ -112,7 +113,7 @@ Suggested order:
    - Leave them as they are and rely on the Bosch brand plus the docs mentioning every brand.
 
    This has to come after the initial PR is merged, because hassfest checks that referenced domains exist. It doesn't block anything else, so it can run in parallel with the platform PRs.
-1. **Diagnostics** (the `diagnostics` Gold rule).
+1. **Diagnostics** (the `diagnostics` Gold rule), together with or followed by the **diagnostic sensors** left out of the initial PR (and any disabled-by-default sensors if those were cut too).
 2. **`binary_sensor`** (75 descriptions): door, remote start allowed, problem events.
 3. **`select`** (91 descriptions): program selection and options, including locked (read-only) entities and filtering unavailable programs.
 4. **`switch`** (83) and **`number`** (34): settings and options.
