@@ -73,6 +73,15 @@
       "reconfigure_successful": "Reconfiguration successful"
     }
   },
+  "selector": {
+    "region": {
+      "options": {
+        "eu": "Europe cloud (Europe, Australia, ...)",
+        "na": "North America cloud (USA, Canada, ...)",
+        "cn": "China cloud (China)"
+      }
+    }
+  },
   "entity": {
     "switch": {
       "switch_power_state": {
