@@ -4654,6 +4654,12 @@
     },
     "fan_no_default_program": {
       "message": "Für den Lüfter dieser Dunstabzugshaube ist kein Standard-Lüftungsprogramm festgelegt."
+    },
+    "setup_cannot_connect": {
+      "message": "Keine Verbindung zu {host}. Siehe {url}, falls sich das nicht von selbst behebt."
+    },
+    "setup_cannot_connect_error": {
+      "message": "Keine Verbindung zu {host} ({error}). Siehe {url}, falls sich das nicht von selbst behebt."
     }
   }
 }
