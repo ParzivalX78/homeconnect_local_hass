@@ -28,7 +28,7 @@
       },
       "legacy_oauth_region": {
         "title": "Home Connect Account Region",
-        "description": "Select the region your Home Connect account is registered in.",
+        "description": "Select the Home Connect cloud your account is on. This is the cloud, not where the appliance is: the Europe cloud also serves Australia.",
         "data": {
           "region": "Region"
         }
@@ -71,6 +71,15 @@
       "oauth_fetch_failed": "Could not fetch appliance profiles from Home Connect: {error}",
       "reauth_entry_not_found": "The config entry being re-authenticated no longer exists",
       "reconfigure_successful": "Reconfiguration successful"
+    }
+  },
+  "selector": {
+    "region": {
+      "options": {
+        "eu": "Europe cloud (Europe, Australia, ...)",
+        "na": "North America cloud (USA, Canada, ...)",
+        "cn": "China cloud (China)"
+      }
     }
   },
   "entity": {

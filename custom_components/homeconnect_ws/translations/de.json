@@ -28,7 +28,7 @@
       },
       "legacy_oauth_region": {
         "title": "Home Connect Kontoregion",
-        "description": "Wählen Sie die Region aus, in der Ihr Home Connect Konto registriert ist.",
+        "description": "Wählen Sie die Home Connect Cloud aus, in der Ihr Konto liegt. Gemeint ist die Cloud, nicht der Standort des Geräts: Die Europa-Cloud bedient auch Australien.",
         "data": {
           "region": "Region"
         }
@@ -71,6 +71,15 @@
       "reconfigure_successful": "Neukonfiguration erfolgreich",
       "oauth_fetch_failed": "Geräteprofile konnten nicht von Home Connect abgerufen werden: {error}",
       "reauth_entry_not_found": "Der neu zu authentifizierende Konfigurationseintrag existiert nicht mehr"
+    }
+  },
+  "selector": {
+    "region": {
+      "options": {
+        "eu": "Europa-Cloud (Europa, Australien, ...)",
+        "na": "Nordamerika-Cloud (USA, Kanada, ...)",
+        "cn": "China-Cloud (China)"
+      }
     }
   },
   "entity": {

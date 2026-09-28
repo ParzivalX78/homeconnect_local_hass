@@ -105,15 +105,14 @@ CONFIG_HOST_SCHEMA = vol.Schema(
         vol.Required(CONF_HOST): cv.string,
     }
 )
-REGION_LABELS = {"EU": "Europe", "NA": "North America", "CN": "China"}
 CONFIG_REGION_SCHEMA = vol.Schema(
     {
-        vol.Required(CONF_REGION, default="EU"): SelectSelector(
+        # Labelled in the translations (selector.region). Option keys must be lowercase
+        # there, so the values are lowercased and turned back into region codes below.
+        vol.Required(CONF_REGION, default="eu"): SelectSelector(
             SelectSelectorConfig(
-                options=[
-                    SelectOptionDict(value=region, label=REGION_LABELS[region])
-                    for region in REGION_ASSET_BASE
-                ]
+                options=[region.lower() for region in REGION_ASSET_BASE],
+                translation_key=CONF_REGION,
             )
         ),
     }
@@ -262,7 +261,7 @@ class HomeConnectConfigFlow(ConfigFlow, domain=DOMAIN):
                     return await self._async_step_appliances_fetched()
 
         if user_input is not None:
-            self._region = user_input[CONF_REGION]
+            self._region = user_input[CONF_REGION].upper()
             self._legacy_code_verifier = legacy_generate_code_verifier()
             self._legacy_state = legacy_generate_state()
             return await self.async_step_legacy_oauth_paste()
