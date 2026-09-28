@@ -105,7 +105,14 @@ CONFIG_HOST_SCHEMA = vol.Schema(
         vol.Required(CONF_HOST): cv.string,
     }
 )
-REGION_LABELS = {"EU": "Europe", "NA": "North America", "CN": "China"}
+# Which of Home Connect's clouds holds the account, not where the appliance is: the Europe
+# cloud serves Australia too. The countries are examples (there's no published list), the
+# same wording as the Home Connect Profile Downloader's region picker.
+REGION_LABELS = {
+    "EU": "Europe cloud (Europe, Australia, ...)",
+    "NA": "North America cloud (USA, Canada, ...)",
+    "CN": "China cloud (China)",
+}
 CONFIG_REGION_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_REGION, default="EU"): SelectSelector(

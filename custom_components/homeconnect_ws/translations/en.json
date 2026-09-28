@@ -28,7 +28,7 @@
       },
       "legacy_oauth_region": {
         "title": "Home Connect Account Region",
-        "description": "Select the region your Home Connect account is registered in.",
+        "description": "Select the Home Connect cloud your account is on. This is the cloud, not where the appliance is: the Europe cloud also serves Australia.",
         "data": {
           "region": "Region"
         }
