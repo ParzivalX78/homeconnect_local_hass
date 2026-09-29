@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.components.light import (
@@ -35,6 +36,7 @@ if TYPE_CHECKING:
     from .entity_descriptions.descriptions_definitions import HCLightEntityDescription
 
 PARALLEL_UPDATES = 0
+WRITE_DELAY = 0.5  # seconds between sequential writes to the appliance
 
 
 async def async_setup_entry(
@@ -149,45 +151,53 @@ class HCLight(HCEntity, LightEntity):
             return match_max_scale((255,), rgb)
         return None
 
+    async def _write(self, uid: int, value: Any) -> None:
+        """Send a single value, the same way turn_off does."""
+        await self._runtime_data.appliance.session.send_sync(
+            HC_Message(
+                resource="/ro/values",
+                action=Action.POST,
+                data=[{"uid": uid, "value": value}],
+            )
+        )
+
     @error_decorator
     async def async_turn_on(self, **kwargs: Any) -> None:
-        message = HC_Message(
-            resource="/ro/values",
-            action=Action.POST,
-            data=[],
-        )
-        brightness = kwargs.get(ATTR_BRIGHTNESS, self.brightness)
-        rgb = kwargs.get(ATTR_RGB_COLOR, self.rgb_color)
+        # 1) Power on as a separate single-value write (turn_off works this way)
+        if self._entity.value is not True:
+            await self._write(self._entity.uid, True)
+            await asyncio.sleep(WRITE_DELAY)
 
         if self._attr_color_mode == ColorMode.RGB:
-            rgb_with_brightness = tuple(color * brightness // 255 for color in rgb)
-            message.data.append(
-                {
-                    "uid": self._color_entity.uid,
-                    "value": "#" + color_rgb_to_hex(*rgb_with_brightness),
-                }
-            )
+            brightness = kwargs.get(ATTR_BRIGHTNESS, self.brightness) or 255
+            rgb = kwargs.get(ATTR_RGB_COLOR, self.rgb_color) or (255, 255, 255)
+            # 2) Switch colour mode to CustomColor before writing the colour
             if (
                 self._color_mode_entity is not None
                 and self._color_mode_entity.value != "CustomColor"
             ):
                 color_mode_value = self._color_mode_entity._rev_enumeration["CustomColor"]  # noqa: SLF001
-                message.data.append({"uid": self._color_mode_entity.uid, "value": color_mode_value})
+                await self._write(self._color_mode_entity.uid, color_mode_value)
+                await asyncio.sleep(WRITE_DELAY)
+            # 3) Only then write the custom colour
+            rgb_with_brightness = tuple(color * brightness // 255 for color in rgb)
+            await self._write(
+                self._color_entity.uid, "#" + color_rgb_to_hex(*rgb_with_brightness)
+            )
+            return
 
-        elif (
-            self._attr_color_mode in (ColorMode.BRIGHTNESS, ColorMode.COLOR_TEMP)
-            and ATTR_BRIGHTNESS in kwargs
-        ):
+        if ATTR_BRIGHTNESS in kwargs and self._brightness_entity is not None:
             value_in_range = int(
                 max(
-                    brightness_to_value((1, 100), brightness),
+                    brightness_to_value((1, 100), kwargs[ATTR_BRIGHTNESS]),
                     self._brightness_entity.min,
                 )
             )
-            message.data.append({"uid": self._brightness_entity.uid, "value": value_in_range})
+            await self._write(self._brightness_entity.uid, value_in_range)
 
-        if ATTR_COLOR_TEMP_KELVIN in kwargs:
+        if ATTR_COLOR_TEMP_KELVIN in kwargs and self._color_temperature_entity is not None:
             if self._color_temp_presets_entity:
+                await self._write(self._color_temp_presets_entity.uid, 0)
                 value_in_range = int(
                     scale_ranged_value_to_int_range(
                         (DEFAULT_MIN_KELVIN + 1, DEFAULT_MAX_KELVIN),
@@ -195,7 +205,6 @@ class HCLight(HCEntity, LightEntity):
                         kwargs[ATTR_COLOR_TEMP_KELVIN],
                     )
                 )
-                message.data.append({"uid": self._color_temp_presets_entity.uid, "value": 0})
             else:
                 value_in_range = int(
                     scale_ranged_value_to_int_range(
@@ -204,13 +213,7 @@ class HCLight(HCEntity, LightEntity):
                         kwargs[ATTR_COLOR_TEMP_KELVIN],
                     )
                 )
-            message.data.append(
-                {"uid": self._color_temperature_entity.uid, "value": value_in_range}
-            )
-
-        if self._entity.value is not True:
-            message.data.append({"uid": self._entity.uid, "value": True})
-        await self._runtime_data.appliance.session.send_sync(message)
+            await self._write(self._color_temperature_entity.uid, value_in_range)
 
     @error_decorator
     async def async_turn_off(self, **kwargs: Any) -> None:
