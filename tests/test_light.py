@@ -793,23 +793,13 @@ async def test_set_color(
         },
         blocking=True,
     )
-    # Color mode is switched first, as its own write, then the color.
-    assert mock_appliance.session.send_sync.await_args_list == [
-        call(
-            Message(
-                resource="/ro/values",
-                action=Action.POST,
-                data=[{"uid": 112, "value": 1}],
-            )
-        ),
-        call(
-            Message(
-                resource="/ro/values",
-                action=Action.POST,
-                data=[{"uid": 111, "value": "#800000"}],
-            )
-        ),
-    ]
+    mock_appliance.session.send_sync.assert_awaited_once_with(
+        Message(
+            resource="/ro/values",
+            action=Action.POST,
+            data=[{"uid": 111, "value": "#800000"}, {"uid": 112, "value": 1}],
+        )
+    )
     mock_appliance.session.send_sync.reset_mock()
 
 
@@ -1007,3 +997,45 @@ async def test_turn_on_writes_color_once_available_after_power_on(
             )
         ),
     ]
+
+
+async def test_plain_turn_on_does_not_wait_for_color(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """
+    A turn_on without color or brightness must not wait for the color Setting.
+
+    The appliance restores its last color on power-on, so there is nothing to
+    write - and an appliance whose color Setting never becomes available must
+    not stall every plain turn-on.
+    """
+
+    async def _must_not_wait(*_: object) -> None:
+        msg = "plain turn_on must not wait for the color Setting"
+        raise AssertionError(msg)
+
+    monkeypatch.setattr(
+        "custom_components.homeconnect_ws.light.HCLight._wait_for_rgb_usable", _must_not_wait
+    )
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+    await mock_appliance.entities["Test.Lighting"].update({"value": False})
+    await mock_appliance.entities["Test.LightingCustomColor"].update({"available": False})
+    await hass.async_block_till_done()
+
+    await hass.services.async_call(
+        LIGHT_DOMAIN,
+        SERVICE_TURN_ON,
+        {ATTR_ENTITY_ID: "light.fake_brand_homeappliance_light_4"},
+        blocking=True,
+    )
+
+    mock_appliance.session.send_sync.assert_awaited_once_with(
+        Message(
+            resource="/ro/values",
+            action=Action.POST,
+            data=[{"uid": 108, "value": True}],
+        )
+    )

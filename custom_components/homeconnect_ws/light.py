@@ -228,6 +228,10 @@ class HCLight(HCEntity, LightEntity):
         rgb = kwargs.get(ATTR_RGB_COLOR, self.rgb_color)
 
         if self._attr_color_mode == ColorMode.RGB:
+            if ATTR_RGB_COLOR not in kwargs and ATTR_BRIGHTNESS not in kwargs:
+                # Plain turn-on: the appliance restores its last color itself,
+                # so there is nothing to write and no reason to wait.
+                return
             if powered_on_now:
                 # The color Settings only become available after power-on.
                 # Evaluating _rgb_usable before that would silently drop a
@@ -235,24 +239,21 @@ class HCLight(HCEntity, LightEntity):
                 await self._wait_for_rgb_usable()
             if not (self._rgb_usable and rgb is not None and brightness is not None):
                 return
-            # Color mode goes first, as its own write: the custom color
-            # Setting may only accept a value once the mode is CustomColor.
+            color_entity = cast("HcEntity", self._color_entity)
+            rgb_with_brightness = tuple(color * brightness // 255 for color in rgb)
+            color_data: list[dict[str, Any]] = [
+                {
+                    "uid": color_entity.uid,
+                    "value": "#" + color_rgb_to_hex(*rgb_with_brightness),
+                }
+            ]
             if (
                 self._color_mode_entity is not None
                 and self._color_mode_entity.value != "CustomColor"
             ):
                 color_mode_value = self._color_mode_entity._rev_enumeration["CustomColor"]  # noqa: SLF001
-                await self._write([{"uid": self._color_mode_entity.uid, "value": color_mode_value}])
-            color_entity = cast("HcEntity", self._color_entity)
-            rgb_with_brightness = tuple(color * brightness // 255 for color in rgb)
-            await self._write(
-                [
-                    {
-                        "uid": color_entity.uid,
-                        "value": "#" + color_rgb_to_hex(*rgb_with_brightness),
-                    }
-                ]
-            )
+                color_data.append({"uid": self._color_mode_entity.uid, "value": color_mode_value})
+            await self._write(color_data)
             return
 
         message_data: list[dict[str, Any]] = []
