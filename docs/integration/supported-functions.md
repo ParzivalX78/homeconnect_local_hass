@@ -164,6 +164,9 @@ Some entites are excluded from this integration on purpose, even though the Home
   - Disabled by default: display brightness, cappuccino sequence, latte macchiato pause, milk reminder, default bean container, leave profiles automatically
 - Maintenance countdowns
   - Cleaning, descaling, water filter replacement
+- Care reminders
+  - Descaling state (ok, due, overdue, blocked)
+  - Problem sensors for cleaning due, Calc'n'Clean due, clean brewing unit, clean milk system, change water filter and the milk reminder
 - Water tank and drip tray level sensors
   - Reports water tank and drip tray fill/empty state
 - Per-drink brew counters

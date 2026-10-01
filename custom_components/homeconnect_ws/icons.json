@@ -146,6 +146,24 @@
                 }
             },
             "binary_sensor_bean_container_empty": {},
+            "binary_sensor_coffee_cleaning_due": {
+                "default": "mdi:spray-bottle"
+            },
+            "binary_sensor_coffee_calc_n_clean_due": {
+                "default": "mdi:water-sync"
+            },
+            "binary_sensor_coffee_clean_brewing_unit": {
+                "default": "mdi:coffee-maker-outline"
+            },
+            "binary_sensor_coffee_clean_milk_system": {
+                "default": "mdi:cup-water"
+            },
+            "binary_sensor_coffee_milk_reminder": {
+                "default": "mdi:fridge-alert-outline"
+            },
+            "binary_sensor_coffee_water_filter_change": {
+                "default": "mdi:filter-outline"
+            },
             "binary_remote_start_allowed": {
                 "state": {
                     "on": "mdi:remote",
@@ -320,6 +338,15 @@
                     "ok": "mdi:tray",
                     "not_inserted": "mdi:tray-remove",
                     "full": "mdi:tray-alert"
+                }
+            },
+            "sensor_coffee_descaling": {
+                "default": "mdi:water-check",
+                "state": {
+                    "blocked": "mdi:alert-octagon-outline",
+                    "overdue": "mdi:water-alert",
+                    "due": "mdi:water-alert",
+                    "ok": "mdi:water-check"
                 }
             },
             "sensor_start_in": {},
