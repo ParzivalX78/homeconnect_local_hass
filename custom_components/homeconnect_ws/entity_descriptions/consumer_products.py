@@ -55,14 +55,6 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             value_off={"Off"},
         ),
         HCBinarySensorEntityDescription(
-            key="binary_sensor_coffee_clean_milk_system",
-            entity="ConsumerProducts.CoffeeMaker.Event.CleanMilkTank",
-            entity_category=EntityCategory.DIAGNOSTIC,
-            device_class=BinarySensorDeviceClass.PROBLEM,
-            value_on={"Present", "Confirmed"},
-            value_off={"Off"},
-        ),
-        HCBinarySensorEntityDescription(
             key="binary_sensor_coffee_milk_reminder",
             entity="ConsumerProducts.CoffeeMaker.Event.MilkReminder",
             entity_category=EntityCategory.DIAGNOSTIC,

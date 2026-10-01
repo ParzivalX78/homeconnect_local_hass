@@ -354,9 +354,6 @@
       "binary_sensor_coffee_clean_brewing_unit": {
         "name": "Brüheinheit reinigen"
       },
-      "binary_sensor_coffee_clean_milk_system": {
-        "name": "Milchsystem reinigen"
-      },
       "binary_sensor_coffee_milk_reminder": {
         "name": "Milch-Erinnerung"
       },

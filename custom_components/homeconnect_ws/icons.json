@@ -155,9 +155,6 @@
             "binary_sensor_coffee_clean_brewing_unit": {
                 "default": "mdi:coffee-maker-outline"
             },
-            "binary_sensor_coffee_clean_milk_system": {
-                "default": "mdi:cup-water"
-            },
             "binary_sensor_coffee_milk_reminder": {
                 "default": "mdi:fridge-alert-outline"
             },

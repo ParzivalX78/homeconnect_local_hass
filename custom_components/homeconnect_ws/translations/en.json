@@ -354,9 +354,6 @@
       "binary_sensor_coffee_clean_brewing_unit": {
         "name": "Clean brewing unit"
       },
-      "binary_sensor_coffee_clean_milk_system": {
-        "name": "Clean milk system"
-      },
       "binary_sensor_coffee_milk_reminder": {
         "name": "Milk reminder"
       },
