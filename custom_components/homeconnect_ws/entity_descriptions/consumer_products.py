@@ -33,7 +33,6 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCBinarySensorEntityDescription(
             key="binary_sensor_coffee_cleaning_due",
             entity="ConsumerProducts.CoffeeMaker.Event.DeviceShouldBeCleaned",
-            entity_category=EntityCategory.DIAGNOSTIC,
             device_class=BinarySensorDeviceClass.PROBLEM,
             value_on={"Present", "Confirmed"},
             value_off={"Off"},
@@ -41,7 +40,6 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCBinarySensorEntityDescription(
             key="binary_sensor_coffee_calc_n_clean_due",
             entity="ConsumerProducts.CoffeeMaker.Event.DeviceShouldBeCalcNCleaned",
-            entity_category=EntityCategory.DIAGNOSTIC,
             device_class=BinarySensorDeviceClass.PROBLEM,
             value_on={"Present", "Confirmed"},
             value_off={"Off"},
@@ -49,7 +47,6 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCBinarySensorEntityDescription(
             key="binary_sensor_coffee_clean_brewing_unit",
             entity="ConsumerProducts.CoffeeMaker.Event.CleanBrewingUnit",
-            entity_category=EntityCategory.DIAGNOSTIC,
             device_class=BinarySensorDeviceClass.PROBLEM,
             value_on={"Present", "Confirmed"},
             value_off={"Off"},
@@ -57,7 +54,6 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCBinarySensorEntityDescription(
             key="binary_sensor_coffee_milk_reminder",
             entity="ConsumerProducts.CoffeeMaker.Event.MilkReminder",
-            entity_category=EntityCategory.DIAGNOSTIC,
             device_class=BinarySensorDeviceClass.PROBLEM,
             value_on={"Present", "Confirmed"},
             value_off={"Off"},
@@ -65,7 +61,6 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCBinarySensorEntityDescription(
             key="binary_sensor_coffee_water_filter_change",
             entity="ConsumerProducts.CoffeeMaker.Event.WaterFilterShouldBeChanged",
-            entity_category=EntityCategory.DIAGNOSTIC,
             device_class=BinarySensorDeviceClass.PROBLEM,
             value_on={"Present", "Confirmed"},
             value_off={"Off"},
