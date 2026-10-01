@@ -30,6 +30,41 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             value_on={"Present"},
             value_off={"Off", "Confirmed"},
         ),
+        HCBinarySensorEntityDescription(
+            key="binary_sensor_coffee_cleaning_due",
+            entity="ConsumerProducts.CoffeeMaker.Event.DeviceShouldBeCleaned",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            value_on={"Present", "Confirmed"},
+            value_off={"Off"},
+        ),
+        HCBinarySensorEntityDescription(
+            key="binary_sensor_coffee_calc_n_clean_due",
+            entity="ConsumerProducts.CoffeeMaker.Event.DeviceShouldBeCalcNCleaned",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            value_on={"Present", "Confirmed"},
+            value_off={"Off"},
+        ),
+        HCBinarySensorEntityDescription(
+            key="binary_sensor_coffee_clean_brewing_unit",
+            entity="ConsumerProducts.CoffeeMaker.Event.CleanBrewingUnit",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            value_on={"Present", "Confirmed"},
+            value_off={"Off"},
+        ),
+        HCBinarySensorEntityDescription(
+            key="binary_sensor_coffee_milk_reminder",
+            entity="ConsumerProducts.CoffeeMaker.Event.MilkReminder",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            value_on={"Present", "Confirmed"},
+            value_off={"Off"},
+        ),
+        HCBinarySensorEntityDescription(
+            key="binary_sensor_coffee_water_filter_change",
+            entity="ConsumerProducts.CoffeeMaker.Event.WaterFilterShouldBeChanged",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            value_on={"Present", "Confirmed"},
+            value_off={"Off"},
+        ),
     ],
     "event_sensor": [
         HCSensorEntityDescription(
@@ -50,6 +85,16 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             ],
             device_class=SensorDeviceClass.ENUM,
             options=["full", "not_inserted", "ok"],
+        ),
+        HCSensorEntityDescription(
+            key="sensor_coffee_descaling",
+            entities=[
+                "ConsumerProducts.CoffeeMaker.Event.DeviceDescalingBlockage",
+                "ConsumerProducts.CoffeeMaker.Event.DeviceDescalingOverdue",
+                "ConsumerProducts.CoffeeMaker.Event.DeviceShouldBeDescaled",
+            ],
+            device_class=SensorDeviceClass.ENUM,
+            options=["blocked", "overdue", "due", "ok"],
         ),
     ],
     "select": [

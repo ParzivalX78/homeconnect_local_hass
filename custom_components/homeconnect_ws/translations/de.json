@@ -345,6 +345,21 @@
       "binary_sensor_bean_container_empty": {
         "name": "Bohnenbehälter Leer"
       },
+      "binary_sensor_coffee_cleaning_due": {
+        "name": "Reinigung fällig"
+      },
+      "binary_sensor_coffee_calc_n_clean_due": {
+        "name": "Calc'n'Clean fällig"
+      },
+      "binary_sensor_coffee_clean_brewing_unit": {
+        "name": "Brüheinheit reinigen"
+      },
+      "binary_sensor_coffee_milk_reminder": {
+        "name": "Milch-Erinnerung"
+      },
+      "binary_sensor_coffee_water_filter_change": {
+        "name": "Wasserfilter wechseln"
+      },
       "binary_remote_start_allowed": {
         "name": "Fernstart erlaubt"
       },
@@ -1829,6 +1844,15 @@
           "ok": "OK",
           "not_inserted": "Nicht eingesetzt",
           "full": "Voll"
+        }
+      },
+      "sensor_coffee_descaling": {
+        "name": "Entkalken",
+        "state": {
+          "blocked": "Blockiert",
+          "overdue": "Überfällig",
+          "due": "Fällig",
+          "ok": "OK"
         }
       },
       "sensor_start_in": {
