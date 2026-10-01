@@ -573,6 +573,21 @@
       },
       "binary_sensor_oven_meatprobe_plugged": {
         "name": "Meat Probe Plugged"
+      },
+      "binary_sensor_coffee_brewing_unit_missing": {
+        "name": "Brewing unit missing"
+      },
+      "binary_sensor_coffee_outlet_missing": {
+        "name": "Beverage outlet missing"
+      },
+      "binary_sensor_coffee_close_door": {
+        "name": "Brewing unit door open"
+      },
+      "binary_sensor_coffee_not_enough_water": {
+        "name": "Not enough water for this beverage"
+      },
+      "binary_sensor_coffee_grounds_container_full": {
+        "name": "Grounds container too full for this beverage"
       }
     },
     "sensor": {

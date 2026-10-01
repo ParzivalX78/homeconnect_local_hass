@@ -166,6 +166,8 @@ Some entites are excluded from this integration on purpose, even though the Home
   - Cleaning, descaling, water filter replacement
 - Water tank and drip tray level sensors
   - Reports water tank and drip tray fill/empty state
+- Attention needed
+  - Problem sensors for brewing unit missing, beverage outlet missing, brewing unit door open, not enough water and grounds container too full for the selected beverage
 - Per-drink brew counters
   - Coffee, espresso, milk-based drinks, and more
 
