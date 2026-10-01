@@ -26,7 +26,6 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCBinarySensorEntityDescription(
             key="binary_sensor_coffee_brewing_unit_missing",
             entity="ConsumerProducts.CoffeeMaker.Event.BrewingUnitIsMissing",
-            entity_category=EntityCategory.DIAGNOSTIC,
             device_class=BinarySensorDeviceClass.PROBLEM,
             value_on={"Present", "Confirmed"},
             value_off={"Off"},
@@ -34,7 +33,6 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCBinarySensorEntityDescription(
             key="binary_sensor_coffee_outlet_missing",
             entity="ConsumerProducts.CoffeeMaker.Event.CoffeeOutletMissing",
-            entity_category=EntityCategory.DIAGNOSTIC,
             device_class=BinarySensorDeviceClass.PROBLEM,
             value_on={"Present", "Confirmed"},
             value_off={"Off"},
@@ -42,7 +40,6 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCBinarySensorEntityDescription(
             key="binary_sensor_coffee_close_door",
             entity="ConsumerProducts.CoffeeMaker.Event.CloseDoor",
-            entity_category=EntityCategory.DIAGNOSTIC,
             device_class=BinarySensorDeviceClass.PROBLEM,
             value_on={"Present", "Confirmed"},
             value_off={"Off"},
@@ -50,7 +47,6 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCBinarySensorEntityDescription(
             key="binary_sensor_coffee_not_enough_water",
             entity="ConsumerProducts.CoffeeMaker.Event.NotEnoughWaterForThisKindOfBeverage",
-            entity_category=EntityCategory.DIAGNOSTIC,
             device_class=BinarySensorDeviceClass.PROBLEM,
             value_on={"Present", "Confirmed"},
             value_off={"Off"},
@@ -58,7 +54,6 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCBinarySensorEntityDescription(
             key="binary_sensor_coffee_grounds_container_full",
             entity="ConsumerProducts.CoffeeMaker.Event.NotEnoughPomaceCapacityForThisKindOfBeverage",
-            entity_category=EntityCategory.DIAGNOSTIC,
             device_class=BinarySensorDeviceClass.PROBLEM,
             value_on={"Present", "Confirmed"},
             value_off={"Off"},
