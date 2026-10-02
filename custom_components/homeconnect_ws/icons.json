@@ -277,7 +277,14 @@
                     "on": "mdi:thermometer-probe",
                     "off": "mdi:thermometer-probe-off"
                 }
-            }
+            },
+            "binary_sensor_coffee_brewing_unit_missing": {
+                "default": "mdi:puzzle-remove-outline"
+            },
+            "binary_sensor_coffee_outlet_missing": {
+                "default": "mdi:coffee-off-outline"
+            },
+            "binary_sensor_coffee_close_door": {}
         },
         "sensor": {
             "sensor_laundry_load_recommendation": {

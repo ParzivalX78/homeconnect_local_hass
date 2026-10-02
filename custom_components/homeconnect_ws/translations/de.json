@@ -592,6 +592,15 @@
       },
       "binary_sensor_temperature_alarm_chiller_common": {
         "name": "Temperaturalarm Chiller"
+      },
+      "binary_sensor_coffee_brewing_unit_missing": {
+        "name": "Brüheinheit fehlt"
+      },
+      "binary_sensor_coffee_outlet_missing": {
+        "name": "Getränkeauslauf fehlt"
+      },
+      "binary_sensor_coffee_close_door": {
+        "name": "Klappe Brüheinheit"
       }
     },
     "sensor": {

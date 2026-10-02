@@ -24,6 +24,27 @@ if TYPE_CHECKING:
 CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
     "binary_sensor": [
         HCBinarySensorEntityDescription(
+            key="binary_sensor_coffee_brewing_unit_missing",
+            entity="ConsumerProducts.CoffeeMaker.Event.BrewingUnitIsMissing",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            value_on={"Present", "Confirmed"},
+            value_off={"Off"},
+        ),
+        HCBinarySensorEntityDescription(
+            key="binary_sensor_coffee_outlet_missing",
+            entity="ConsumerProducts.CoffeeMaker.Event.CoffeeOutletMissing",
+            device_class=BinarySensorDeviceClass.PROBLEM,
+            value_on={"Present", "Confirmed"},
+            value_off={"Off"},
+        ),
+        HCBinarySensorEntityDescription(
+            key="binary_sensor_coffee_close_door",
+            entity="ConsumerProducts.CoffeeMaker.Event.CloseDoor",
+            device_class=BinarySensorDeviceClass.DOOR,
+            value_on={"Present", "Confirmed"},
+            value_off={"Off"},
+        ),
+        HCBinarySensorEntityDescription(
             key="binary_sensor_bean_container_empty",
             entity="ConsumerProducts.CoffeeMaker.Event.BeanContainerEmpty",
             device_class=BinarySensorDeviceClass.PROBLEM,
