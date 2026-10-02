@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Container
+from dataclasses import replace
 from typing import TYPE_CHECKING, Literal, NotRequired, TypedDict
 
 from home_disconnect import HomeAppliance
@@ -107,6 +108,30 @@ class HCSensorEntityDescription(
     # going up. Shows the value anyway while a program is active (and there
     # is a value), falling back to the appliance's own flag otherwise.
     available_while_program_active: bool = False
+
+
+def keep_known_events(
+    description: HCSensorEntityDescription, appliance_entities: Container[str]
+) -> HCSensorEntityDescription | None:
+    """
+    Reduce an event sensor to the events this appliance actually has.
+
+    An event sensor lists several stages of one thing (e.g. descaling due,
+    overdue, blocked), and not every model has every stage. Instead of
+    dropping the whole sensor when one is missing, keep the ones the
+    appliance knows together with their options; the last option is the
+    fallback when none is set and always stays.
+    """
+    events = description.entities or []
+    known = [index for index, event in enumerate(events) if event in appliance_entities]
+    if not known:
+        return None
+    if len(known) == len(events):
+        return description
+    options = description.options
+    if options is not None:
+        options = [options[index] for index in known] + [options[-1]]
+    return replace(description, entities=[events[index] for index in known], options=options)
 
 
 class HCBinarySensorEntityDescription(

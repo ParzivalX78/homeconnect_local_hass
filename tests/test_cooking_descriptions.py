@@ -129,3 +129,27 @@ async def test_two_real_cavities_keep_name_suffix(
     assert sorted(
         description.translation_placeholders["group_name"] for description in descriptions["sensor"]
     ) == [" 1", " 2"]
+
+
+async def test_generate_oven_status_water_tank_partial(
+    mock_homeconnect_appliance: MockApplianceType,
+) -> None:
+    """A cavity with only one water tank status still gets the sensor."""
+    description = DeviceDescription(
+        status=[
+            EntityDescription(
+                uid=1,
+                name="Cooking.Oven.Status.Cavity.001.WaterTankEmpty",
+                available=True,
+                access=Access.READ,
+            ),
+        ]
+    )
+    appliance = await mock_homeconnect_appliance(description=description)
+    descriptions = generate_oven_status(appliance)
+
+    assert len(descriptions["event_sensor"]) == 1
+    assert descriptions["event_sensor"][0].entities == [
+        "Cooking.Oven.Status.Cavity.001.WaterTankEmpty"
+    ]
+    assert descriptions["event_sensor"][0].options == ["empty", "ok"]

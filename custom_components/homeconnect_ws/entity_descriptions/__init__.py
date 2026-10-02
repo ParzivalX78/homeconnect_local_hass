@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
 from typing import TYPE_CHECKING, cast
 
 from custom_components.homeconnect_ws.helpers import merge_dicts
@@ -24,6 +23,7 @@ from .descriptions_definitions import (
     HCUpdateEntityDescription,
     _EntityDescriptionsDefinitionsType,
     _EntityDescriptionsType,
+    keep_known_events,
 )
 from .dishcare import DISHCARE_ENTITY_DESCRIPTIONS
 from .laundry_care import LAUNDRY_ENTITY_DESCRIPTIONS
@@ -80,39 +80,13 @@ def _available_description(
 ) -> HCEntityDescription | None:
     """Return the description if this appliance can back it, else None."""
     if description_type == "event_sensor":
-        return _keep_known_events(
-            cast("HCSensorEntityDescription", description), appliance_entities
-        )
+        return keep_known_events(cast("HCSensorEntityDescription", description), appliance_entities)
     subscribed: set[str] = set()
     if description.entity:
         subscribed.add(description.entity)
     if description.entities:
         subscribed.update(description.entities)
     return description if appliance_entities.issuperset(subscribed) else None
-
-
-def _keep_known_events(
-    description: HCSensorEntityDescription, appliance_entities: set[str]
-) -> HCSensorEntityDescription | None:
-    """
-    Reduce an event sensor to the events this appliance actually has.
-
-    An event sensor lists several stages of one thing (e.g. descaling due,
-    overdue, blocked), and not every model has every stage. Instead of
-    dropping the whole sensor when one is missing, keep the ones the
-    appliance knows together with their options; the last option is the
-    fallback when none is set and always stays.
-    """
-    events = description.entities or []
-    known = [index for index, event in enumerate(events) if event in appliance_entities]
-    if not known:
-        return None
-    if len(known) == len(events):
-        return description
-    options = description.options
-    if options is not None:
-        options = [options[index] for index in known] + [options[-1]]
-    return replace(description, entities=[events[index] for index in known], options=options)
 
 
 def get_available_entities(appliance: HomeAppliance) -> _EntityDescriptionsType:
