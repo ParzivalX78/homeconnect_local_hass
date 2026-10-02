@@ -581,7 +581,7 @@
         "name": "Beverage outlet missing"
       },
       "binary_sensor_coffee_close_door": {
-        "name": "Brewing unit door open"
+        "name": "Brewing unit door"
       }
     },
     "sensor": {

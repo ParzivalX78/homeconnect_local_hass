@@ -40,7 +40,7 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
         HCBinarySensorEntityDescription(
             key="binary_sensor_coffee_close_door",
             entity="ConsumerProducts.CoffeeMaker.Event.CloseDoor",
-            device_class=BinarySensorDeviceClass.PROBLEM,
+            device_class=BinarySensorDeviceClass.DOOR,
             value_on={"Present", "Confirmed"},
             value_off={"Off"},
         ),

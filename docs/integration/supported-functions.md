@@ -167,7 +167,7 @@ Some entites are excluded from this integration on purpose, even though the Home
 - Water tank and drip tray level sensors
   - Reports water tank and drip tray fill/empty state
 - Attention needed
-  - Problem sensors for brewing unit missing, beverage outlet missing and brewing unit door open
+  - Problem sensors for brewing unit missing and beverage outlet missing, and a door sensor for the brewing unit door
 - Per-drink brew counters
   - Coffee, espresso, milk-based drinks, and more
 

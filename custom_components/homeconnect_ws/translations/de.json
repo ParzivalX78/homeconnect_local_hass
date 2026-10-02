@@ -585,7 +585,7 @@
         "name": "Getränkeauslauf fehlt"
       },
       "binary_sensor_coffee_close_door": {
-        "name": "Tür Brüheinheit offen"
+        "name": "Klappe Brüheinheit"
       }
     },
     "sensor": {

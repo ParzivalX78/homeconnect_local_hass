@@ -269,9 +269,7 @@
             "binary_sensor_coffee_outlet_missing": {
                 "default": "mdi:coffee-off-outline"
             },
-            "binary_sensor_coffee_close_door": {
-                "default": "mdi:door-open"
-            }
+            "binary_sensor_coffee_close_door": {}
         },
         "sensor": {
             "sensor_laundry_load_recommendation": {
