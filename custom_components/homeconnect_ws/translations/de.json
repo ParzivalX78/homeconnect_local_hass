@@ -1855,6 +1855,23 @@
           "ok": "OK"
         }
       },
+      "sensor_coffee_care_program_step": {
+        "name": "Pflegeprogramm-Schritt",
+        "state": {
+          "empty_drip_tray": "Tropfschale leeren",
+          "empty_drip_tray_remove_container": "Tropfschale leeren und Gefäß entnehmen",
+          "insert_cleaning_tablet": "Reinigungstablette einwerfen",
+          "fill_descaler": "Entkalker einfüllen",
+          "empty_milk_container": "Milchbehälter leeren",
+          "place_empty_glass": "Leeres Glas unterstellen",
+          "place_container": "Gefäß unterstellen",
+          "clean_milk_container": "Milchbehälter reinigen",
+          "rinse_and_fill_water_tank": "Wassertank ausspülen und füllen",
+          "remove_container": "Gefäß entnehmen",
+          "finished": "Fertig",
+          "none": "Keine Aktion nötig"
+        }
+      },
       "sensor_start_in": {
         "name": "Starten in"
       },
