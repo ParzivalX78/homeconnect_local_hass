@@ -45,20 +45,6 @@ CONSUMER_PRODUCTS_ENTITY_DESCRIPTIONS: _EntityDescriptionsDefinitionsType = {
             value_off={"Off"},
         ),
         HCBinarySensorEntityDescription(
-            key="binary_sensor_coffee_not_enough_water",
-            entity="ConsumerProducts.CoffeeMaker.Event.NotEnoughWaterForThisKindOfBeverage",
-            device_class=BinarySensorDeviceClass.PROBLEM,
-            value_on={"Present", "Confirmed"},
-            value_off={"Off"},
-        ),
-        HCBinarySensorEntityDescription(
-            key="binary_sensor_coffee_grounds_container_full",
-            entity="ConsumerProducts.CoffeeMaker.Event.NotEnoughPomaceCapacityForThisKindOfBeverage",
-            device_class=BinarySensorDeviceClass.PROBLEM,
-            value_on={"Present", "Confirmed"},
-            value_off={"Off"},
-        ),
-        HCBinarySensorEntityDescription(
             key="binary_sensor_bean_container_empty",
             entity="ConsumerProducts.CoffeeMaker.Event.BeanContainerEmpty",
             device_class=BinarySensorDeviceClass.PROBLEM,

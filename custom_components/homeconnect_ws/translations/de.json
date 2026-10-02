@@ -586,12 +586,6 @@
       },
       "binary_sensor_coffee_close_door": {
         "name": "Tür Brüheinheit offen"
-      },
-      "binary_sensor_coffee_not_enough_water": {
-        "name": "Nicht genug Wasser für dieses Getränk"
-      },
-      "binary_sensor_coffee_grounds_container_full": {
-        "name": "Tresterbehälter zu voll für dieses Getränk"
       }
     },
     "sensor": {
