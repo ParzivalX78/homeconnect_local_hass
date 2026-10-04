@@ -31,6 +31,8 @@ from .entity import HCEntity
 from .helpers import create_entities, entity_is_available, error_decorator
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from home_disconnect.entities import Entity as HcEntity
     from homeassistant.core import HomeAssistant
     from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -179,32 +181,52 @@ class HCLight(HCEntity, LightEntity):
             return False
         return entity_is_available(self._color_entity, self.entity_description.available_access)
 
-    async def _wait_for_rgb_usable(self) -> None:
+    @property
+    def _custom_color_mode_pending(self) -> bool:
         """
-        Wait for the color Setting to become available after power-on.
+        Whether the color mode can, and still needs to, be set to CustomColor.
 
-        The appliance flips the color Settings to available with a
-        descriptionChange NOTIFY shortly after the power-on write is
-        acknowledged. Writing the color before that is rejected with
-        WriteRequest NotAvailable, so wait for the callback instead of
-        firing blind. Times out silently; _rgb_usable then skips the color.
+        While a preset color is active, the LC91KWW60/04 hood offers the color
+        mode Setting but not the custom color Setting at all; the custom color
+        only becomes available once the mode is CustomColor (upstream #477).
         """
-        if self._color_entity is None or self._rgb_usable:
+        if self._color_mode_entity is None:
+            return False
+        return (
+            entity_is_available(self._color_mode_entity, self.entity_description.available_access)
+            and self._color_mode_entity.value != "CustomColor"
+        )
+
+    async def _wait_until(self, condition: Callable[[], bool]) -> None:
+        """
+        Wait (bounded) until condition() holds after a write.
+
+        The appliance reports Setting availability changes via a
+        descriptionChange NOTIFY shortly after a write is acknowledged, so
+        wait for that callback instead of firing blind. Times out silently;
+        the caller re-checks availability before writing.
+        """
+        if condition():
             return
-        became_usable = asyncio.Event()
+        entities = [e for e in (self._color_entity, self._color_mode_entity) if e is not None]
+        if not entities:
+            return
+        condition_met = asyncio.Event()
 
         async def _on_update(_: HcEntity) -> None:
-            if self._rgb_usable:
-                became_usable.set()
+            if condition():
+                condition_met.set()
 
-        self._color_entity.register_callback(_on_update)
+        for entity in entities:
+            entity.register_callback(_on_update)
         try:
             async with asyncio.timeout(_RGB_AVAILABLE_TIMEOUT):
-                await became_usable.wait()
+                await condition_met.wait()
         except TimeoutError:
             pass
         finally:
-            self._color_entity.unregister_callback(_on_update)
+            for entity in entities:
+                entity.unregister_callback(_on_update)
 
     async def _write(self, data: list[dict[str, Any]]) -> None:
         await self._runtime_data.appliance.session.send_sync(
@@ -234,9 +256,16 @@ class HCLight(HCEntity, LightEntity):
                 return
             if powered_on_now:
                 # The color Settings only become available after power-on.
-                # Evaluating _rgb_usable before that would silently drop a
-                # color passed with turn_on (e.g. picking a color while off).
-                await self._wait_for_rgb_usable()
+                # Evaluating them before that would silently drop a color
+                # passed with turn_on (e.g. picking a color while off).
+                await self._wait_until(lambda: self._rgb_usable or self._custom_color_mode_pending)
+            if not self._rgb_usable and self._custom_color_mode_pending:
+                # A preset color is active and the custom color Setting is not
+                # offered: switch to CustomColor first, then wait for it.
+                mode_entity = cast("HcEntity", self._color_mode_entity)
+                color_mode_value = mode_entity._rev_enumeration["CustomColor"]  # noqa: SLF001
+                await self._write([{"uid": mode_entity.uid, "value": color_mode_value}])
+                await self._wait_until(lambda: self._rgb_usable)
             if not (self._rgb_usable and rgb is not None and brightness is not None):
                 return
             color_entity = cast("HcEntity", self._color_entity)

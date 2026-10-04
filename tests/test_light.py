@@ -822,6 +822,9 @@ async def test_turn_on_skips_color_write_when_color_setting_unavailable(
     monkeypatch.setattr("custom_components.homeconnect_ws.light._RGB_AVAILABLE_TIMEOUT", 0.05)
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
     await mock_appliance.entities["Test.Lighting"].update({"value": False})
+    # While off, the hood reports both the color mode and the custom color
+    # Settings as unavailable (descriptionChange for 589/590 on #477).
+    await mock_appliance.entities["Test.LightingColor"].update({"available": False})
     await mock_appliance.entities["Test.LightingCustomColor"].update({"available": False})
     await hass.async_block_till_done()
 
@@ -1018,7 +1021,7 @@ async def test_plain_turn_on_does_not_wait_for_color(
         raise AssertionError(msg)
 
     monkeypatch.setattr(
-        "custom_components.homeconnect_ws.light.HCLight._wait_for_rgb_usable", _must_not_wait
+        "custom_components.homeconnect_ws.light.HCLight._wait_until", _must_not_wait
     )
     assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
     await mock_appliance.entities["Test.Lighting"].update({"value": False})
@@ -1039,3 +1042,62 @@ async def test_plain_turn_on_does_not_wait_for_color(
             data=[{"uid": 108, "value": True}],
         )
     )
+
+
+async def test_set_color_from_preset_switches_mode_first(
+    hass: HomeAssistant,
+    mock_appliance: MockAppliance,
+    patch_entity_description: None,
+) -> None:
+    """
+    Picking a custom color while a preset color is active must work.
+
+    Confirmed live on upstream issue #477 (Siemens LC91KWW60/04): with a preset
+    color active, the hood offers the color mode Setting but not the custom
+    color Setting at all; the custom color only becomes available once the
+    mode is switched to CustomColor. Without switching first, no color write
+    was sent at all.
+    """
+    assert await setup_config_entry(hass, MOCK_CONFIG_DATA)
+    await mock_appliance.entities["Test.Lighting"].update({"value": True})
+    await mock_appliance.entities["Test.LightingColor"].update({"value": 33})
+    await mock_appliance.entities["Test.LightingCustomColor"].update({"available": False})
+    await hass.async_block_till_done()
+
+    color_entity = mock_appliance.entities["Test.LightingCustomColor"]
+    mode_entity = mock_appliance.entities["Test.LightingColor"]
+
+    async def _appliance_reacts(message: Message) -> None:
+        if message.data == [{"uid": 112, "value": 1}]:
+            await mode_entity.update({"value": 1})
+            hass.async_create_task(color_entity.update({"available": True}))
+
+    mock_appliance.session.send_sync.side_effect = _appliance_reacts
+
+    await hass.services.async_call(
+        LIGHT_DOMAIN,
+        SERVICE_TURN_ON,
+        {
+            ATTR_ENTITY_ID: "light.fake_brand_homeappliance_light_4",
+            ATTR_RGB_COLOR: (0, 0, 255),
+            ATTR_BRIGHTNESS: 255,
+        },
+        blocking=True,
+    )
+
+    assert mock_appliance.session.send_sync.await_args_list == [
+        call(
+            Message(
+                resource="/ro/values",
+                action=Action.POST,
+                data=[{"uid": 112, "value": 1}],
+            )
+        ),
+        call(
+            Message(
+                resource="/ro/values",
+                action=Action.POST,
+                data=[{"uid": 111, "value": "#0000ff"}],
+            )
+        ),
+    ]
