@@ -112,6 +112,9 @@ class HCLight(HCEntity, LightEntity):
     def is_on(self) -> bool | None:
         if self._entity is None:
             return None
+        if self._entity.value is None:
+            # Not reported by the appliance yet - "unknown", not "off".
+            return None
         return bool(self._entity.value)
 
     @property

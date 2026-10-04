@@ -334,13 +334,15 @@ async def async_setup_entry(
     coordinator = HomeConnectCoordinator(hass, config_entry)
     appliance = coordinator.appliance
     if config_entry.unique_id is None:
-        msg = "Config entry is missing its unique_id"
-        raise ConfigEntryError(msg)
+        raise ConfigEntryError(translation_domain=DOMAIN, translation_key="missing_unique_id")
     device_info = DeviceInfo(
         hw_version=appliance.info.get("hwVersion"),
         identifiers={(DOMAIN, config_entry.unique_id)},
         model=f"{appliance.info.get('type')}",
-        model_id=appliance.info.get("vib"),
+        # The full BSH product number (E-Nr), e.g. "PRG486WDH/01": the model
+        # number plus its customer index (production variant), which is what
+        # spare parts are looked up by. Falls back to the bare model number.
+        model_id=appliance.info.get("eNumber") or appliance.info.get("vib"),
         serial_number=appliance.info.get("serialNumber"),
         sw_version=appliance.info.get("swVersion"),
     )

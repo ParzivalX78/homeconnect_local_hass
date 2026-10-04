@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import copy
 from copy import deepcopy
 from ipaddress import ip_address
 from pathlib import Path
@@ -233,6 +234,44 @@ async def test_device_registry_serial_number(
         device = device_registry.async_get_device(identifiers={(DOMAIN, entry.unique_id)})
     assert device is not None
     assert device.serial_number == MOCK_APPLIANCE_INFO["serialNumber"]
+
+
+@pytest.mark.parametrize(
+    ("e_number", "expected_model_id"),
+    [("Fake_vib/01", "Fake_vib/01"), (None, MOCK_APPLIANCE_INFO["vib"])],
+)
+async def test_device_registry_model_id(
+    hass: HomeAssistant,
+    monkeypatch: pytest.MonkeyPatch,
+    e_number: str | None,
+    expected_model_id: str,
+) -> None:
+    """model_id is the full product number (E-Nr) when reported, else the model number."""
+    description = copy.deepcopy(DEVICE_DESCRIPTION)
+    if e_number is not None:
+        description["info"]["eNumber"] = e_number
+    appliance = MockAppliance(description, "host", "mock_app", "mock_app_id", "PSK_KEY")
+    monkeypatch.setattr(coordinator, "HomeAppliance", Mock(return_value=appliance))
+
+    entry = MockConfigEntry(
+        domain=DOMAIN,
+        data=MOCK_CONFIG_DATA,
+        unique_id=MOCK_TLS_DEVICE_ID,
+    )
+    entry.add_to_hass(hass)
+
+    await hass.config_entries.async_setup(entry.entry_id)
+    await hass.async_block_till_done()
+
+    device_registry = dr.async_get(hass)
+    if hasattr(device_registry, "async_get_device_by_identifier"):
+        device = device_registry.async_get_device_by_identifier(
+            (DOMAIN, entry.unique_id), entry.entry_id
+        )
+    else:
+        device = device_registry.async_get_device(identifiers={(DOMAIN, entry.unique_id)})
+    assert device is not None
+    assert device.model_id == expected_model_id
 
 
 async def test_setup_entry_washer_connect_failure_is_non_blocking(

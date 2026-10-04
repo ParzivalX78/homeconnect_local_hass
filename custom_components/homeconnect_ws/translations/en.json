@@ -28,7 +28,7 @@
       },
       "legacy_oauth_region": {
         "title": "Home Connect Account Region",
-        "description": "Select the region your Home Connect account is registered in.",
+        "description": "Select the Home Connect cloud your account is on. This is the cloud, not where the appliance is: the Europe cloud also serves Australia.",
         "data": {
           "region": "Region"
         }
@@ -70,7 +70,17 @@
       "failed_to_write_profile_file": "Profile File could not be stored",
       "oauth_fetch_failed": "Could not fetch appliance profiles from Home Connect: {error}",
       "reauth_entry_not_found": "The config entry being re-authenticated no longer exists",
-      "reconfigure_successful": "Reconfiguration successful"
+      "reconfigure_successful": "Reconfiguration successful",
+      "invalid_discovery_info": "The discovered appliance didn't announce its brand or type."
+    }
+  },
+  "selector": {
+    "region": {
+      "options": {
+        "eu": "Europe cloud (Europe, Australia, ...)",
+        "na": "North America cloud (USA, Canada, ...)",
+        "cn": "China cloud (China)"
+      }
     }
   },
   "entity": {
@@ -113,6 +123,9 @@
       },
       "switch_cup_warmer": {
         "name": "Cup warmer"
+      },
+      "switch_coffee_leave_profiles_automatically": {
+        "name": "Leave profiles automatically"
       },
       "switch_half_load": {
         "name": "Half load"
@@ -331,6 +344,21 @@
       },
       "binary_sensor_bean_container_empty": {
         "name": "Bean Container Empty"
+      },
+      "binary_sensor_coffee_cleaning_due": {
+        "name": "Cleaning due"
+      },
+      "binary_sensor_coffee_calc_n_clean_due": {
+        "name": "Calc'n'Clean due"
+      },
+      "binary_sensor_coffee_clean_brewing_unit": {
+        "name": "Clean brewing unit"
+      },
+      "binary_sensor_coffee_milk_reminder": {
+        "name": "Milk reminder"
+      },
+      "binary_sensor_coffee_water_filter_change": {
+        "name": "Change water filter"
       },
       "binary_remote_start_allowed": {
         "name": "Remote start allowed"
@@ -560,6 +588,15 @@
       },
       "binary_sensor_oven_meatprobe_plugged": {
         "name": "Meat Probe Plugged"
+      },
+      "binary_sensor_coffee_brewing_unit_missing": {
+        "name": "Brewing unit missing"
+      },
+      "binary_sensor_coffee_outlet_missing": {
+        "name": "Beverage outlet missing"
+      },
+      "binary_sensor_coffee_close_door": {
+        "name": "Brewing unit door"
       }
     },
     "sensor": {
@@ -1643,6 +1680,32 @@
           "full": "Full"
         }
       },
+      "sensor_coffee_descaling": {
+        "name": "Descaling",
+        "state": {
+          "blocked": "Blocked",
+          "overdue": "Overdue",
+          "due": "Due",
+          "ok": "OK"
+        }
+      },
+      "sensor_coffee_care_program_step": {
+        "name": "Care program step",
+        "state": {
+          "empty_drip_tray": "Empty drip tray",
+          "empty_drip_tray_remove_container": "Empty drip tray and remove container",
+          "insert_cleaning_tablet": "Insert cleaning tablet",
+          "fill_descaler": "Fill in descaler",
+          "empty_milk_container": "Empty milk container",
+          "place_empty_glass": "Place empty glass under outlet",
+          "place_container": "Place container under outlet",
+          "clean_milk_container": "Clean milk container",
+          "rinse_and_fill_water_tank": "Rinse and fill water tank",
+          "remove_container": "Remove container",
+          "finished": "Finished",
+          "none": "No action needed"
+        }
+      },
       "sensor_start_in": {
         "name": "Start in"
       },
@@ -2035,7 +2098,8 @@
         }
       },
       "sensor_machine_care_reminder": {
-        "name": "Machine Care Reminder"
+        "name": "Machine Care Reminder",
+        "unit_of_measurement": "cycles"
       },
       "sensor_oven_water_tank_group": {
         "name": "Water Tank{group_name}",
@@ -3360,6 +3424,98 @@
           "six": "Six"
         }
       },
+      "select_coffee_switch_off_after": {
+        "name": "Switch off after",
+        "state": {
+          "00hours05minutes": "5 min",
+          "00hours10minutes": "10 min",
+          "00hours15minutes": "15 min",
+          "00hours20minutes": "20 min",
+          "00hours25minutes": "25 min",
+          "00hours30minutes": "30 min",
+          "00hours35minutes": "35 min",
+          "00hours40minutes": "40 min",
+          "00hours45minutes": "45 min",
+          "00hours50minutes": "50 min",
+          "00hours55minutes": "55 min",
+          "01hours00minutes": "1 h",
+          "01hours15minutes": "1 h 15 min",
+          "01hours30minutes": "1 h 30 min",
+          "01hours45minutes": "1 h 45 min",
+          "02hours00minutes": "2 h",
+          "02hours15minutes": "2 h 15 min",
+          "02hours30minutes": "2 h 30 min",
+          "02hours45minutes": "2 h 45 min",
+          "03hours00minutes": "3 h"
+        }
+      },
+      "select_coffee_water_hardness": {
+        "name": "Water hardness",
+        "state": {
+          "soft": "Soft",
+          "medium": "Medium",
+          "hard": "Hard",
+          "veryhard": "Very hard",
+          "softeningdevice": "Water softening system"
+        }
+      },
+      "select_coffee_user_mode": {
+        "name": "User mode",
+        "state": {
+          "standard": "Standard",
+          "barista": "Barista"
+        }
+      },
+      "select_coffee_milk_order": {
+        "name": "Cappuccino sequence",
+        "state": {
+          "firstmilk": "Milk first",
+          "firstcoffee": "Coffee first"
+        }
+      },
+      "select_coffee_macchiato_pause": {
+        "name": "Latte macchiato pause",
+        "state": {
+          "min": "Minimum",
+          "5sec": "5 s",
+          "10sec": "10 s"
+        }
+      },
+      "select_coffee_milk_reminder": {
+        "name": "Milk reminder after",
+        "state": {
+          "off": "Off",
+          "00hours05minutes": "5 min",
+          "00hours10minutes": "10 min",
+          "00hours15minutes": "15 min",
+          "00hours20minutes": "20 min",
+          "00hours25minutes": "25 min",
+          "00hours30minutes": "30 min",
+          "00hours35minutes": "35 min",
+          "00hours40minutes": "40 min",
+          "00hours45minutes": "45 min",
+          "00hours50minutes": "50 min",
+          "00hours55minutes": "55 min",
+          "01hours00minutes": "1 h",
+          "01hours15minutes": "1 h 15 min",
+          "01hours30minutes": "1 h 30 min",
+          "01hours45minutes": "1 h 45 min",
+          "02hours00minutes": "2 h",
+          "02hours15minutes": "2 h 15 min",
+          "02hours30minutes": "2 h 30 min",
+          "02hours45minutes": "2 h 45 min",
+          "03hours00minutes": "3 h"
+        }
+      },
+      "select_coffee_default_bean_container": {
+        "name": "Default bean container",
+        "state": {
+          "mostrecentlyselectedbeancontainer": "Last used",
+          "defaultbeancontainerright": "Right",
+          "defaultbeancontainerleft": "Left",
+          "savebeancontainerwithbeverage": "Saved per beverage"
+        }
+      },
       "select_auto_power_off": {
         "name": "Auto Power off",
         "state": {
@@ -3949,6 +4105,9 @@
       "number_fill_quantity": {
         "name": "Fill quantity"
       },
+      "number_coffee_display_brightness": {
+        "name": "Display brightness"
+      },
       "number_laundry_brightness": {
         "name": "Brightness"
       },
@@ -4154,6 +4313,18 @@
     },
     "command_timeout": {
       "message": "The appliance did not answer the command in time"
+    },
+    "missing_unique_id": {
+      "message": "This config entry has no unique ID. Remove the appliance and add it again."
+    },
+    "fan_no_default_program": {
+      "message": "This hood's fan has no default venting program to start."
+    },
+    "setup_cannot_connect": {
+      "message": "Can't connect to {host}. See {url} if this doesn't resolve on its own."
+    },
+    "setup_cannot_connect_error": {
+      "message": "Can't connect to {host} ({error}). See {url} if this doesn't resolve on its own."
     }
   },
   "options": {
@@ -4162,6 +4333,10 @@
         "title": "Export Full Profile",
         "description": "Writes this appliance's Full profile ZIP - the two profile XML files plus the local encryption key - to your config directory, under `homeconnect_ws_export/`. Retrieve it via Samba, SSH, or the File Editor add-on.\n\nFor the Safe profile (no key/MAC/serial - safe to share for a feature request), use the device page's **Download Diagnostics** button instead - no confirmation needed here for that.\n\nSubmit to confirm and write the file."
       }
+    },
+    "abort": {
+      "export_written": "Wrote `{filename}` to your config directory, under `homeconnect_ws_export/`. Retrieve it via Samba, SSH, or the File Editor add-on.",
+      "export_failed": "Couldn't write the export file: {error}"
     }
   }
 }

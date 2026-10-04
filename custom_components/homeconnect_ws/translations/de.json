@@ -28,7 +28,7 @@
       },
       "legacy_oauth_region": {
         "title": "Home Connect Kontoregion",
-        "description": "Wählen Sie die Region aus, in der Ihr Home Connect Konto registriert ist.",
+        "description": "Wählen Sie die Home Connect Cloud aus, in der Ihr Konto liegt. Gemeint ist die Cloud, nicht der Standort des Geräts: Die Europa-Cloud bedient auch Australien.",
         "data": {
           "region": "Region"
         }
@@ -70,7 +70,17 @@
       "failed_to_write_profile_file": "Profildatei konnte nicht gespeichert werden",
       "reconfigure_successful": "Neukonfiguration erfolgreich",
       "oauth_fetch_failed": "Geräteprofile konnten nicht von Home Connect abgerufen werden: {error}",
-      "reauth_entry_not_found": "Der neu zu authentifizierende Konfigurationseintrag existiert nicht mehr"
+      "reauth_entry_not_found": "Der neu zu authentifizierende Konfigurationseintrag existiert nicht mehr",
+      "invalid_discovery_info": "Das gefundene Gerät hat seine Marke oder seinen Typ nicht angegeben."
+    }
+  },
+  "selector": {
+    "region": {
+      "options": {
+        "eu": "Europa-Cloud (Europa, Australien, ...)",
+        "na": "Nordamerika-Cloud (USA, Kanada, ...)",
+        "cn": "China-Cloud (China)"
+      }
     }
   },
   "entity": {
@@ -110,6 +120,9 @@
       },
       "switch_cup_warmer": {
         "name": "Tassenwärmer"
+      },
+      "switch_coffee_leave_profiles_automatically": {
+        "name": "Profile automatisch verlassen"
       },
       "switch_half_load": {
         "name": "Halbe Ladung"
@@ -331,6 +344,21 @@
       },
       "binary_sensor_bean_container_empty": {
         "name": "Bohnenbehälter Leer"
+      },
+      "binary_sensor_coffee_cleaning_due": {
+        "name": "Reinigung fällig"
+      },
+      "binary_sensor_coffee_calc_n_clean_due": {
+        "name": "Calc'n'Clean fällig"
+      },
+      "binary_sensor_coffee_clean_brewing_unit": {
+        "name": "Brüheinheit reinigen"
+      },
+      "binary_sensor_coffee_milk_reminder": {
+        "name": "Milch-Erinnerung"
+      },
+      "binary_sensor_coffee_water_filter_change": {
+        "name": "Wasserfilter wechseln"
       },
       "binary_remote_start_allowed": {
         "name": "Fernstart erlaubt"
@@ -564,6 +592,15 @@
       },
       "binary_sensor_temperature_alarm_chiller_common": {
         "name": "Temperaturalarm Chiller"
+      },
+      "binary_sensor_coffee_brewing_unit_missing": {
+        "name": "Brüheinheit fehlt"
+      },
+      "binary_sensor_coffee_outlet_missing": {
+        "name": "Getränkeauslauf fehlt"
+      },
+      "binary_sensor_coffee_close_door": {
+        "name": "Klappe Brüheinheit"
       }
     },
     "sensor": {
@@ -607,7 +644,8 @@
         }
       },
       "sensor_machine_care_reminder": {
-        "name": "Maschinenpflege Erinnerung"
+        "name": "Maschinenpflege Erinnerung",
+        "unit_of_measurement": "Zyklen"
       },
       "sensor_active_program": {
         "name": "Aktives Programm",
@@ -1815,6 +1853,32 @@
           "ok": "OK",
           "not_inserted": "Nicht eingesetzt",
           "full": "Voll"
+        }
+      },
+      "sensor_coffee_descaling": {
+        "name": "Entkalken",
+        "state": {
+          "blocked": "Blockiert",
+          "overdue": "Überfällig",
+          "due": "Fällig",
+          "ok": "OK"
+        }
+      },
+      "sensor_coffee_care_program_step": {
+        "name": "Pflegeprogramm-Schritt",
+        "state": {
+          "empty_drip_tray": "Tropfschale leeren",
+          "empty_drip_tray_remove_container": "Tropfschale leeren und Gefäß entnehmen",
+          "insert_cleaning_tablet": "Reinigungstablette einwerfen",
+          "fill_descaler": "Entkalker einfüllen",
+          "empty_milk_container": "Milchbehälter leeren",
+          "place_empty_glass": "Leeres Glas unterstellen",
+          "place_container": "Gefäß unterstellen",
+          "clean_milk_container": "Milchbehälter reinigen",
+          "rinse_and_fill_water_tank": "Wassertank ausspülen und füllen",
+          "remove_container": "Gefäß entnehmen",
+          "finished": "Fertig",
+          "none": "Keine Aktion nötig"
         }
       },
       "sensor_start_in": {
@@ -3623,6 +3687,98 @@
           "six": "Sechs"
         }
       },
+      "select_coffee_switch_off_after": {
+        "name": "Abschalten nach",
+        "state": {
+          "00hours05minutes": "5 min",
+          "00hours10minutes": "10 min",
+          "00hours15minutes": "15 min",
+          "00hours20minutes": "20 min",
+          "00hours25minutes": "25 min",
+          "00hours30minutes": "30 min",
+          "00hours35minutes": "35 min",
+          "00hours40minutes": "40 min",
+          "00hours45minutes": "45 min",
+          "00hours50minutes": "50 min",
+          "00hours55minutes": "55 min",
+          "01hours00minutes": "1 h",
+          "01hours15minutes": "1 h 15 min",
+          "01hours30minutes": "1 h 30 min",
+          "01hours45minutes": "1 h 45 min",
+          "02hours00minutes": "2 h",
+          "02hours15minutes": "2 h 15 min",
+          "02hours30minutes": "2 h 30 min",
+          "02hours45minutes": "2 h 45 min",
+          "03hours00minutes": "3 h"
+        }
+      },
+      "select_coffee_water_hardness": {
+        "name": "Wasserhärte",
+        "state": {
+          "soft": "Weich",
+          "medium": "Mittel",
+          "hard": "Hart",
+          "veryhard": "Sehr hart",
+          "softeningdevice": "Enthärtungsanlage"
+        }
+      },
+      "select_coffee_user_mode": {
+        "name": "Benutzermodus",
+        "state": {
+          "standard": "Standard",
+          "barista": "Barista"
+        }
+      },
+      "select_coffee_milk_order": {
+        "name": "Reihenfolge Cappuccino",
+        "state": {
+          "firstmilk": "Erst Milch",
+          "firstcoffee": "Erst Kaffee"
+        }
+      },
+      "select_coffee_macchiato_pause": {
+        "name": "Pause Latte Macchiato",
+        "state": {
+          "min": "Minimal",
+          "5sec": "5 s",
+          "10sec": "10 s"
+        }
+      },
+      "select_coffee_milk_reminder": {
+        "name": "Milch-Erinnerung nach",
+        "state": {
+          "off": "Aus",
+          "00hours05minutes": "5 min",
+          "00hours10minutes": "10 min",
+          "00hours15minutes": "15 min",
+          "00hours20minutes": "20 min",
+          "00hours25minutes": "25 min",
+          "00hours30minutes": "30 min",
+          "00hours35minutes": "35 min",
+          "00hours40minutes": "40 min",
+          "00hours45minutes": "45 min",
+          "00hours50minutes": "50 min",
+          "00hours55minutes": "55 min",
+          "01hours00minutes": "1 h",
+          "01hours15minutes": "1 h 15 min",
+          "01hours30minutes": "1 h 30 min",
+          "01hours45minutes": "1 h 45 min",
+          "02hours00minutes": "2 h",
+          "02hours15minutes": "2 h 15 min",
+          "02hours30minutes": "2 h 30 min",
+          "02hours45minutes": "2 h 45 min",
+          "03hours00minutes": "3 h"
+        }
+      },
+      "select_coffee_default_bean_container": {
+        "name": "Standard-Bohnenbehälter",
+        "state": {
+          "mostrecentlyselectedbeancontainer": "Zuletzt verwendet",
+          "defaultbeancontainerright": "Rechts",
+          "defaultbeancontainerleft": "Links",
+          "savebeancontainerwithbeverage": "Je Getränk gespeichert"
+        }
+      },
       "select_auto_power_off": {
         "name": "Automatische Abschaltung",
         "state": {
@@ -4319,6 +4475,9 @@
       "number_fill_quantity": {
         "name": "Füllmenge"
       },
+      "number_coffee_display_brightness": {
+        "name": "Displayhelligkeit"
+      },
       "number_laundry_brightness": {
         "name": "Helligkeit"
       },
@@ -4482,6 +4641,10 @@
           "mode": "Exporttyp"
         }
       }
+    },
+    "abort": {
+      "export_written": "`{filename}` wurde in Ihr Konfigurationsverzeichnis unter `homeconnect_ws_export/` geschrieben. Abrufen können Sie die Datei über Samba, SSH oder das File-Editor-Add-on.",
+      "export_failed": "Die Exportdatei konnte nicht geschrieben werden: {error}"
     }
   },
   "exceptions": {
@@ -4535,6 +4698,18 @@
     },
     "command_timeout": {
       "message": "Das Gerät hat den Befehl nicht rechtzeitig beantwortet"
+    },
+    "missing_unique_id": {
+      "message": "Dieser Konfigurationseintrag hat keine eindeutige ID. Entfernen Sie das Gerät und fügen Sie es erneut hinzu."
+    },
+    "fan_no_default_program": {
+      "message": "Für den Lüfter dieser Dunstabzugshaube ist kein Standard-Lüftungsprogramm festgelegt."
+    },
+    "setup_cannot_connect": {
+      "message": "Keine Verbindung zu {host}. Siehe {url}, falls sich das nicht von selbst behebt."
+    },
+    "setup_cannot_connect_error": {
+      "message": "Keine Verbindung zu {host} ({error}). Siehe {url}, falls sich das nicht von selbst behebt."
     }
   }
 }
