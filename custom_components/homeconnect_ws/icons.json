@@ -353,6 +353,13 @@
                     "ok": "mdi:water-check"
                 }
             },
+            "sensor_coffee_care_program_step": {
+                "default": "mdi:hand-back-right-outline",
+                "state": {
+                    "none": "mdi:list-status",
+                    "finished": "mdi:check-circle-outline"
+                }
+            },
             "sensor_start_in": {},
             "sensor_count_started": {},
             "sensor_end_trigger": {},

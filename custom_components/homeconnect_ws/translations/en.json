@@ -1689,6 +1689,23 @@
           "ok": "OK"
         }
       },
+      "sensor_coffee_care_program_step": {
+        "name": "Care program step",
+        "state": {
+          "empty_drip_tray": "Empty drip tray",
+          "empty_drip_tray_remove_container": "Empty drip tray and remove container",
+          "insert_cleaning_tablet": "Insert cleaning tablet",
+          "fill_descaler": "Fill in descaler",
+          "empty_milk_container": "Empty milk container",
+          "place_empty_glass": "Place empty glass under outlet",
+          "place_container": "Place container under outlet",
+          "clean_milk_container": "Clean milk container",
+          "rinse_and_fill_water_tank": "Rinse and fill water tank",
+          "remove_container": "Remove container",
+          "finished": "Finished",
+          "none": "No action needed"
+        }
+      },
       "sensor_start_in": {
         "name": "Start in"
       },
