@@ -48,6 +48,13 @@ PARALLEL_UPDATES = 0
 _RGB_AVAILABLE_TIMEOUT = 2.0
 
 
+def _brightness_value(entity: HcEntity, brightness: int) -> int:
+    """Convert a Home Assistant brightness (0-255) to the appliance's 1-100 scale."""
+    return int(
+        max(brightness_to_value((1, 100), brightness), cast("float", getattr(entity, "min", 0.0)))
+    )
+
+
 async def async_setup_entry(
     hass: HomeAssistant,  # noqa: ARG001
     config_entry: HCConfigEntry,
@@ -133,6 +140,14 @@ class HCLight(HCEntity, LightEntity):
         # normal, not an error: fall back to None rather than crashing on a
         # None-valued conversion, and don't gate the whole entity's
         # availability on these secondary capabilities (see is_on/available).
+        if (
+            self._preset_active
+            and self._brightness_entity is not None
+            and self._brightness_entity.value is not None
+        ):
+            # A preset color has its own brightness Setting; the custom color's
+            # hex value only describes the last custom color.
+            return value_to_brightness((1, 100), cast("float", self._brightness_entity.value))
         if self._color_entity is not None and self._color_entity.value is not None:
             rgb = rgb_hex_to_rgb_list(cast("str", self._color_entity.value).strip("#"))
             return max(rgb)
@@ -182,6 +197,25 @@ class HCLight(HCEntity, LightEntity):
         return entity_is_available(self._color_entity, self.entity_description.available_access)
 
     @property
+    def _preset_active(self) -> bool:
+        """Whether a preset color (not CustomColor) is selected."""
+        return self._color_mode_entity is not None and self._color_mode_entity.value not in (
+            None,
+            "CustomColor",
+        )
+
+    @property
+    def _preset_brightness_usable(self) -> bool:
+        """Whether the brightness Setting for a preset color can be written."""
+        return (
+            self._preset_active
+            and self._brightness_entity is not None
+            and entity_is_available(
+                self._brightness_entity, self.entity_description.available_access
+            )
+        )
+
+    @property
     def _custom_color_mode_pending(self) -> bool:
         """
         Whether the color mode can, and still needs to, be set to CustomColor.
@@ -208,7 +242,11 @@ class HCLight(HCEntity, LightEntity):
         """
         if condition():
             return
-        entities = [e for e in (self._color_entity, self._color_mode_entity) if e is not None]
+        entities = [
+            entity
+            for entity in (self._color_entity, self._color_mode_entity, self._brightness_entity)
+            if entity is not None
+        ]
         if not entities:
             return
         condition_met = asyncio.Event()
@@ -233,6 +271,57 @@ class HCLight(HCEntity, LightEntity):
             HC_Message(resource="/ro/values", action=Action.POST, data=data)
         )
 
+    async def _turn_on_rgb(self, kwargs: dict[str, Any], *, powered_on_now: bool) -> None:
+        brightness = kwargs.get(ATTR_BRIGHTNESS, self.brightness)
+        rgb = kwargs.get(ATTR_RGB_COLOR, self.rgb_color)
+        if ATTR_RGB_COLOR not in kwargs and ATTR_BRIGHTNESS not in kwargs:
+            # Plain turn-on: the appliance restores its last color itself,
+            # so there is nothing to write and no reason to wait.
+            return
+        if powered_on_now:
+            # The color Settings only become available after power-on.
+            # Evaluating them before that would silently drop a color
+            # passed with turn_on (e.g. picking a color while off).
+            await self._wait_until(lambda: self._rgb_usable or self._custom_color_mode_pending)
+        if ATTR_RGB_COLOR not in kwargs and self._preset_active:
+            # Brightness-only change while a preset color is active: the
+            # preset has its own brightness Setting. Switching to
+            # CustomColor here would replace the preset with the last
+            # custom color.
+            await self._wait_until(lambda: self._preset_brightness_usable)
+            if self._preset_brightness_usable and brightness is not None:
+                brightness_entity = cast("HcEntity", self._brightness_entity)
+                await self._write(
+                    [
+                        {
+                            "uid": brightness_entity.uid,
+                            "value": _brightness_value(brightness_entity, brightness),
+                        }
+                    ]
+                )
+            return
+        if not self._rgb_usable and self._custom_color_mode_pending:
+            # A preset color is active and the custom color Setting is not
+            # offered: switch to CustomColor first, then wait for it.
+            mode_entity = cast("HcEntity", self._color_mode_entity)
+            color_mode_value = mode_entity._rev_enumeration["CustomColor"]  # noqa: SLF001
+            await self._write([{"uid": mode_entity.uid, "value": color_mode_value}])
+            await self._wait_until(lambda: self._rgb_usable)
+        if not (self._rgb_usable and rgb is not None and brightness is not None):
+            return
+        color_entity = cast("HcEntity", self._color_entity)
+        rgb_with_brightness = tuple(color * brightness // 255 for color in rgb)
+        color_data: list[dict[str, Any]] = [
+            {
+                "uid": color_entity.uid,
+                "value": "#" + color_rgb_to_hex(*rgb_with_brightness),
+            }
+        ]
+        if self._color_mode_entity is not None and self._color_mode_entity.value != "CustomColor":
+            color_mode_value = self._color_mode_entity._rev_enumeration["CustomColor"]  # noqa: SLF001
+            color_data.append({"uid": self._color_mode_entity.uid, "value": color_mode_value})
+        await self._write(color_data)
+
     @error_decorator
     async def async_turn_on(self, **kwargs: Any) -> None:
         powered_on_now = False
@@ -246,45 +335,11 @@ class HCLight(HCEntity, LightEntity):
             await self._write([{"uid": self._entity.uid, "value": True}])
             powered_on_now = True
 
-        brightness = kwargs.get(ATTR_BRIGHTNESS, self.brightness)
-        rgb = kwargs.get(ATTR_RGB_COLOR, self.rgb_color)
-
         if self._attr_color_mode == ColorMode.RGB:
-            if ATTR_RGB_COLOR not in kwargs and ATTR_BRIGHTNESS not in kwargs:
-                # Plain turn-on: the appliance restores its last color itself,
-                # so there is nothing to write and no reason to wait.
-                return
-            if powered_on_now:
-                # The color Settings only become available after power-on.
-                # Evaluating them before that would silently drop a color
-                # passed with turn_on (e.g. picking a color while off).
-                await self._wait_until(lambda: self._rgb_usable or self._custom_color_mode_pending)
-            if not self._rgb_usable and self._custom_color_mode_pending:
-                # A preset color is active and the custom color Setting is not
-                # offered: switch to CustomColor first, then wait for it.
-                mode_entity = cast("HcEntity", self._color_mode_entity)
-                color_mode_value = mode_entity._rev_enumeration["CustomColor"]  # noqa: SLF001
-                await self._write([{"uid": mode_entity.uid, "value": color_mode_value}])
-                await self._wait_until(lambda: self._rgb_usable)
-            if not (self._rgb_usable and rgb is not None and brightness is not None):
-                return
-            color_entity = cast("HcEntity", self._color_entity)
-            rgb_with_brightness = tuple(color * brightness // 255 for color in rgb)
-            color_data: list[dict[str, Any]] = [
-                {
-                    "uid": color_entity.uid,
-                    "value": "#" + color_rgb_to_hex(*rgb_with_brightness),
-                }
-            ]
-            if (
-                self._color_mode_entity is not None
-                and self._color_mode_entity.value != "CustomColor"
-            ):
-                color_mode_value = self._color_mode_entity._rev_enumeration["CustomColor"]  # noqa: SLF001
-                color_data.append({"uid": self._color_mode_entity.uid, "value": color_mode_value})
-            await self._write(color_data)
+            await self._turn_on_rgb(kwargs, powered_on_now=powered_on_now)
             return
 
+        brightness = kwargs.get(ATTR_BRIGHTNESS, self.brightness)
         message_data: list[dict[str, Any]] = []
         if (
             self._attr_color_mode in (ColorMode.BRIGHTNESS, ColorMode.COLOR_TEMP)
@@ -292,13 +347,12 @@ class HCLight(HCEntity, LightEntity):
             and brightness is not None
         ):
             brightness_entity = cast("HcEntity", self._brightness_entity)
-            value_in_range = int(
-                max(
-                    brightness_to_value((1, 100), brightness),
-                    cast("float", getattr(brightness_entity, "min", 0.0)),
-                )
+            message_data.append(
+                {
+                    "uid": brightness_entity.uid,
+                    "value": _brightness_value(brightness_entity, brightness),
+                }
             )
-            message_data.append({"uid": brightness_entity.uid, "value": value_in_range})
 
         if ATTR_COLOR_TEMP_KELVIN in kwargs and self._color_temperature_entity is not None:
             if self._color_temp_presets_entity:

@@ -28,6 +28,7 @@ from homeassistant.const import (
     STATE_ON,
     STATE_UNKNOWN,
 )
+from homeassistant.util.color import value_to_brightness
 
 from . import setup_config_entry
 from .const import MOCK_CONFIG_DATA
@@ -781,8 +782,15 @@ async def test_set_color(
     )
     mock_appliance.session.send_sync.reset_mock()
 
+    # A preset color is active: a brightness-only change writes the preset's
+    # own brightness Setting and keeps the preset, instead of switching to
+    # CustomColor and replacing it with the last custom color.
     await mock_appliance.entities["Test.LightingColor"].update({"value": 33})
+    await mock_appliance.entities["Test.LightingBrightness"].update({"value": 80})
     await hass.async_block_till_done()
+
+    state = hass.states.get("light.fake_brand_homeappliance_light_4")
+    assert state.attributes[ATTR_BRIGHTNESS] == value_to_brightness((1, 100), 80)
 
     await hass.services.async_call(
         LIGHT_DOMAIN,
@@ -797,7 +805,27 @@ async def test_set_color(
         Message(
             resource="/ro/values",
             action=Action.POST,
-            data=[{"uid": 111, "value": "#800000"}, {"uid": 112, "value": 1}],
+            data=[{"uid": 109, "value": 50}],
+        )
+    )
+    mock_appliance.session.send_sync.reset_mock()
+
+    # Picking a color on a preset still switches to CustomColor.
+    await hass.services.async_call(
+        LIGHT_DOMAIN,
+        SERVICE_TURN_ON,
+        {
+            ATTR_ENTITY_ID: "light.fake_brand_homeappliance_light_4",
+            ATTR_RGB_COLOR: (255, 0, 0),
+            ATTR_BRIGHTNESS: 255,
+        },
+        blocking=True,
+    )
+    mock_appliance.session.send_sync.assert_awaited_once_with(
+        Message(
+            resource="/ro/values",
+            action=Action.POST,
+            data=[{"uid": 111, "value": "#ff0000"}, {"uid": 112, "value": 1}],
         )
     )
     mock_appliance.session.send_sync.reset_mock()
