@@ -21,7 +21,7 @@
   ],
   "quality_scale": "platinum",
   "requirements": [
-    "home-disconnect==1.7.0b1"
+    "home-disconnect==1.7.0"
   ],
   "version": "0.0.0",
   "zeroconf": [

@@ -345,6 +345,21 @@
       "binary_sensor_bean_container_empty": {
         "name": "Bean Container Empty"
       },
+      "binary_sensor_coffee_cleaning_due": {
+        "name": "Cleaning due"
+      },
+      "binary_sensor_coffee_calc_n_clean_due": {
+        "name": "Calc'n'Clean due"
+      },
+      "binary_sensor_coffee_clean_brewing_unit": {
+        "name": "Clean brewing unit"
+      },
+      "binary_sensor_coffee_milk_reminder": {
+        "name": "Milk reminder"
+      },
+      "binary_sensor_coffee_water_filter_change": {
+        "name": "Change water filter"
+      },
       "binary_remote_start_allowed": {
         "name": "Remote start allowed"
       },
@@ -573,6 +588,15 @@
       },
       "binary_sensor_oven_meatprobe_plugged": {
         "name": "Meat Probe Plugged"
+      },
+      "binary_sensor_coffee_brewing_unit_missing": {
+        "name": "Brewing unit missing"
+      },
+      "binary_sensor_coffee_outlet_missing": {
+        "name": "Beverage outlet missing"
+      },
+      "binary_sensor_coffee_close_door": {
+        "name": "Brewing unit door"
       }
     },
     "sensor": {
@@ -1654,6 +1678,32 @@
           "ok": "OK",
           "not_inserted": "Not Inserted",
           "full": "Full"
+        }
+      },
+      "sensor_coffee_descaling": {
+        "name": "Descaling",
+        "state": {
+          "blocked": "Blocked",
+          "overdue": "Overdue",
+          "due": "Due",
+          "ok": "OK"
+        }
+      },
+      "sensor_coffee_care_program_step": {
+        "name": "Care program step",
+        "state": {
+          "empty_drip_tray": "Empty drip tray",
+          "empty_drip_tray_remove_container": "Empty drip tray and remove container",
+          "insert_cleaning_tablet": "Insert cleaning tablet",
+          "fill_descaler": "Fill in descaler",
+          "empty_milk_container": "Empty milk container",
+          "place_empty_glass": "Place empty glass under outlet",
+          "place_container": "Place container under outlet",
+          "clean_milk_container": "Clean milk container",
+          "rinse_and_fill_water_tank": "Rinse and fill water tank",
+          "remove_container": "Remove container",
+          "finished": "Finished",
+          "none": "No action needed"
         }
       },
       "sensor_start_in": {

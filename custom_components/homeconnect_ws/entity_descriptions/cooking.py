@@ -25,6 +25,7 @@ from .descriptions_definitions import (
     HCSensorEntityDescription,
     HCSwitchEntityDescription,
     _EntityDescriptionsDefinitionsType,
+    keep_known_events,
 )
 
 if TYPE_CHECKING:
@@ -105,17 +106,19 @@ def generate_oven_status(appliance: HomeAppliance) -> EntityDescriptions:
             f"Cooking.Oven.Status.Cavity.{group[0]}.WaterTankUnplugged",
             f"Cooking.Oven.Status.Cavity.{group[0]}.WaterTankEmpty",
         ]
-        if all(entity in appliance.entities for entity in entities):
-            descriptions["event_sensor"].append(
-                HCSensorEntityDescription(
-                    key=f"sensor_oven_water_tank_{group[0]}",
-                    translation_key="sensor_oven_water_tank_group",
-                    translation_placeholders={"group_name": group_name},
-                    entities=entities,
-                    device_class=SensorDeviceClass.ENUM,
-                    options=["unplugged", "empty", "ok"],
-                )
-            )
+        water_tank = keep_known_events(
+            HCSensorEntityDescription(
+                key=f"sensor_oven_water_tank_{group[0]}",
+                translation_key="sensor_oven_water_tank_group",
+                translation_placeholders={"group_name": group_name},
+                entities=entities,
+                device_class=SensorDeviceClass.ENUM,
+                options=["unplugged", "empty", "ok"],
+            ),
+            appliance.entities,
+        )
+        if water_tank is not None:
+            descriptions["event_sensor"].append(water_tank)
 
         # Temperature (Celsius or Fahrenheit depending on appliance locale)
         cavity_base = f"Cooking.Oven.Status.Cavity.{group[0]}."
