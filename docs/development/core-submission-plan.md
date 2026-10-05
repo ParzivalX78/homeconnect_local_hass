@@ -280,7 +280,7 @@ Options, to decide before the `select` PR (the first platform with lockable enti
 | --- | --- | --- |
 | Drop the attribute, keep visible-but-locked with the error on write | Matches the cloud integration; nothing for reviewers to object to | Users lose the lock indicator #59 asked for |
 | Keep the attribute and explain it in the PR | No feature loss | Likely a review round that ends in dropping it anyway |
-| One "Settings locked" binary sensor per appliance | An entity, which core prefers; one entity instead of an attribute on dozens | Only works if the lock is appliance-wide, which isn't confirmed: Options, Settings and SelectedProgram lock at different times (#59) |
+| One "Settings locked" binary sensor per appliance | An entity, which core prefers; one entity instead of an attribute on dozens | Only works if the lock is appliance-wide, which isn't confirmed: Options, Settings and SelectedProgram lock at different times (#59). If it isn't, it needs a lock sensor per lockable entity, which would add tons of entities |
 
 **Leaning:** drop the attribute. Check first whether the lock really is appliance-wide (then the binary sensor is an option), and point users to the error message the write raises.
 
