@@ -19,8 +19,8 @@ That makes the cloud docs the best official source for what a key and its values
 
 ## What doesn't
 
-- **Whether a key exists locally.** Some cloud keys may be computed by the cloud or renamed. Local entities only exist when the appliance's own device description lists the key, so a key from the docs is a candidate, not a guarantee.
-- **Access.** Something writable through the cloud can be read-only locally, or the other way round. Local access comes from the device description and can change at runtime (see the `READ` handling in [Adding a new entity](entity_descriptions.md#base-entity-hcentitydescription)).
+- **Whether a key exists locally.** Local entities only exist when the appliance's own device description lists the key, and a given appliance may not have every key the docs list for its type. A key from the docs is a candidate, not a guarantee.
+- **Access.** The integration uses the access from the device description, which can change at runtime (see the `READ` handling in [Adding a new entity](entity_descriptions.md#base-entity-hcentitydescription)), not what the docs say. No difference between cloud and local access has been seen so far.
 - **Old names.** Appliances use both older and newer names for some features (for example the older and newer fridge keys). The docs usually only show the current one.
 - **Everything the cloud doesn't expose.** Most local-only keys aren't in the docs at all.
 
