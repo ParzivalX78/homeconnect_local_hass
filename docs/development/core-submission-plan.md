@@ -143,6 +143,8 @@ The first core PR is as small as core allows: **one platform (`sensor`), the con
 - The profile ZIP upload step and the `file_upload` after-dependency (if the sign-in is the chosen setup path). It can come back as a follow-up, see Phase 3.
 - Every translation file except English: core keeps `strings.json` and translations come from Lokalise. The German requirement in this repository doesn't carry over.
 - Anything written defensively for states the data model already rules out. Reviewers ask "why can this be None?", and if the honest answer is "it can't", the code goes.
+- Extra state attributes on the initial PR's sensors: `Is Estimated` on the remaining program time, `Auto Counting` on the oven's cooking times and `Type` on the hob zones. Core discourages new state attributes, so each one either becomes its own entity or is dropped (see [State attributes](#state-attributes-and-the-readonly-attribute)).
+- The grouped event sensors (`HCEventSensor`, e.g. the coffee maker's Descaling sensor). They read events the same way the event binary sensors do (see [Event sensors](#event-sensors-present-and-confirmed)), so they come over with the `binary_sensor` PR and that question is explained once.
 
 ### Pre-flight
 
@@ -243,6 +245,54 @@ Each has reasons to pick it:
 | Keeps working without internet and with the cloud connection turned off | Setups where Home Assistant can't reach the appliance at all, such as a firewall blocking the appliance's network or Home Assistant running at a different site. A missing mDNS route alone isn't one of them, since Home Connect Local can connect by IP address |
 
 The docs for both integrations should explain this so people can choose.
+
+## Design calls reviewers will ask about
+
+Places where the integration deliberately doesn't show the appliance's raw data one-to-one. Each needs a short explanation in the PR that brings it to core. The rule for all of them: show what the appliance reports, only correct data that's shown to be wrong, and don't invent states. The custom integration follows the same rule, so nothing here is custom-only.
+
+### Event sensors: Present and Confirmed
+
+Appliances report events (salt low, door alarm, descaling due and so on) as `Present`, `Confirmed` or `Off`. The integration shows them as binary sensors that are on for both `Present` and `Confirmed`, and off for `Off`. That's 63 of the 81 binary sensor descriptions (counted on `beta` on 2026-10-04), plus the grouped event sensors on the `sensor` platform, which treat both as active too.
+
+**Decision: keep them binary.** The official [Home Connect API documentation](https://api-docs.home-connect.com/events#event-present-state-enumeration) defines `Confirmed` as "The event has been confirmed by the user": acknowledged on the appliance, but not cleared. Only `Off` means the event is over (the freezer door alarm stays active while the door is still open, even after the beep is silenced). So on/off follows the actual condition, and acknowledging a message on the display doesn't make Home Assistant report the problem as solved. Appliances also rarely report `Confirmed` at all (not yet checked on the local API).
+
+Text for the `binary_sensor` PR:
+
+> **Event mapping:** Home Connect reports events as `Present`, `Confirmed` or `Off`. Per the [Home Connect API documentation](https://api-docs.home-connect.com/events#event-present-state-enumeration), `Confirmed` means "the event has been confirmed by the user", i.e. acknowledged on the appliance, while the event itself is still active; only `Off` means it has cleared (for example, the freezer door alarm stays active while the door is still open, even after the beep is silenced). These binary sensors are therefore on for both `Present` and `Confirmed`, and off only for `Off`. Acknowledging a message on the appliance's display shouldn't make Home Assistant report the problem as solved, and this keeps automations simple: one on/off state that tracks the actual condition.
+
+Rejected alternatives:
+
+- **Enum sensors with all three states** (what the cloud `home_connect` integration does). Turns the biggest platform into enum sensors for a difference most events don't need.
+- **Both a binary and an enum sensor per event.** Core doesn't want two entities for the same data.
+- **A `confirmed` state attribute.** Core discourages new state attributes, so don't offer it in the PR.
+
+If a reviewer asks how to tell `Confirmed` from `Present`, answer then: a separate enum sensor, disabled by default, for only the events where it matters (the door alarms are the likely ones). Not an attribute.
+
+### State attributes and the `readonly` attribute
+
+Core discourages extra state attributes in new code: they're stored with every state change, are awkward to use in automations, and reviewers usually ask for a separate entity instead or for the attribute to be dropped.
+
+The biggest case is `readonly`. Every Option-, Setting- or SelectedProgram-backed entity carries it (see [Adding a new entity](entity_descriptions.md#base-entity-hcentitydescription)): appliances lock these to read-only while a program runs, the entity stays available, and a write raises a clear error. The visible-but-locked behavior is easy to defend, since the official app does the same and the cloud integration also keeps read-only entities available and errors on write. The attribute is the hard part: it was added on request in fork issue #59 so templates and cards can show the lock, and dropping it in core takes that away.
+
+Options, to decide before the `select` PR (the first platform with lockable entities):
+
+| Option | For | Against |
+| --- | --- | --- |
+| Drop the attribute, keep visible-but-locked with the error on write | Matches the cloud integration; nothing for reviewers to object to | Users lose the lock indicator #59 asked for |
+| Keep the attribute and explain it in the PR | No feature loss | Likely a review round that ends in dropping it anyway |
+| One "Settings locked" binary sensor per appliance | An entity, which core prefers; one entity instead of an attribute on dozens | Only works if the lock is appliance-wide, which isn't confirmed: Options, Settings and SelectedProgram lock at different times (#59). If it isn't, it needs a lock sensor per lockable entity, which would add tons of entities |
+
+**Leaning:** drop the attribute. Check first whether the lock really is appliance-wide (then the binary sensor is an option), and point users to the error message the write raises.
+
+The other attributes (`Is Estimated`, `Auto Counting`, the hob zone `Type`, `Last Start`) follow the same rule: make an entity if it's useful on its own, otherwise drop it.
+
+### Optimistic hood boost
+
+The hood's `fan` entity shows a just-requested boost for 8 seconds before the hood confirms it (`_OPTIMISTIC_PRESET_DURATION` in `fan.py`), because the hood is slow to report it. Core wants entities to follow the device whenever the device reports its own state, and optimistic state is meant for devices that don't. Replace it before the `fan` PR (ideally in v2.0.0): wait in the action until the hood confirms, with a timeout, the same way the light's `_wait_until` does.
+
+### Corrections for stale values
+
+Some values are overridden because the appliance leaves them stale, for example program phase and progress, which freeze at their last running value once an appliance powers itself off while staying connected (`_no_active_program_and_off` in `sensor.py`). These correct wrong data instead of hiding real data, so they're fine in core. Each one needs a comment naming the appliance it was confirmed on, and a test.
 
 ## Open questions
 
