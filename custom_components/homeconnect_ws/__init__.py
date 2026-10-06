@@ -156,8 +156,9 @@ async def _set_finish_in_with_active_program(
     and ActiveProgram written together in a single /ro/values message, sent
     while ActiveProgram's own access briefly reports READ_WRITE.
 
-    If that is rejected with 541 too, start the selected program with
-    FinishInRelative as a start option instead (#146).
+    If that is rejected with 541 too, or ActiveProgram never becomes
+    writable, start the selected program with FinishInRelative as a start
+    option instead (#146).
     """
     active_program_entity = appliance.entities.get("BSH.Common.Root.ActiveProgram")
     program = appliance.selected_program
@@ -166,7 +167,17 @@ async def _set_finish_in_with_active_program(
             translation_domain=DOMAIN,
             translation_key="no_program_selected",
         )
-    await _wait_for_writable(active_program_entity)
+    try:
+        await _wait_for_writable(active_program_entity)
+    except ServiceValidationError as not_writable:
+        # ActiveProgram never opened for writing, so the combined write can't
+        # be sent. The program start below doesn't need that window; if it is
+        # rejected too, report the original problem rather than the start's.
+        try:
+            await _start_selected_program(appliance, {finish_in_entity.uid: seconds})
+        except ServiceValidationError:
+            raise not_writable from None
+        return
     message = HC_Message(
         resource="/ro/values",
         action=Action.POST,

@@ -946,3 +946,44 @@ async def test_set_finish_in_with_active_program_translates_program_start_error(
         pytest.raises(ServiceValidationError),
     ):
         await _set_finish_in_with_active_program(appliance, finish_in_entity, 100)
+
+
+async def test_set_finish_in_with_active_program_starts_program_when_never_writable() -> None:
+    """If ActiveProgram never opens for writing, go straight to the program start."""
+    appliance = MagicMock()
+    active_program_entity = MagicMock(uid=256, access=Access.READ)
+    appliance.entities = {"BSH.Common.Root.ActiveProgram": active_program_entity}
+    appliance.selected_program = MagicMock(uid=28675)
+    appliance.selected_program.start = AsyncMock()
+    appliance.session.send_sync = AsyncMock()
+    finish_in_entity = MagicMock(uid=551)
+
+    with (
+        patch("custom_components.homeconnect_ws._ACTIVE_PROGRAM_WRITABLE_TIMEOUT", 0.01),
+        patch("custom_components.homeconnect_ws.build_known_option_set", return_value={}),
+    ):
+        await _set_finish_in_with_active_program(appliance, finish_in_entity, 8700)
+
+    appliance.session.send_sync.assert_not_awaited()
+    appliance.selected_program.start.assert_awaited_once_with({551: 8700}, override_options=True)
+
+
+async def test_set_finish_in_with_active_program_keeps_not_writable_error() -> None:
+    """If the program start fails too, the original not-writable error is reported."""
+    appliance = MagicMock()
+    active_program_entity = MagicMock(uid=256, access=Access.READ)
+    appliance.entities = {"BSH.Common.Root.ActiveProgram": active_program_entity}
+    appliance.selected_program = MagicMock(uid=1)
+    appliance.selected_program.start = AsyncMock(
+        side_effect=CodeResponsError(501, "/ro/activeProgram")
+    )
+    finish_in_entity = MagicMock(uid=551)
+
+    with (
+        patch("custom_components.homeconnect_ws._ACTIVE_PROGRAM_WRITABLE_TIMEOUT", 0.01),
+        patch("custom_components.homeconnect_ws.build_known_option_set", return_value={}),
+        pytest.raises(ServiceValidationError) as err,
+    ):
+        await _set_finish_in_with_active_program(appliance, finish_in_entity, 100)
+
+    assert err.value.translation_key == "finish_in_not_writable"
