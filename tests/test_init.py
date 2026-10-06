@@ -890,13 +890,59 @@ async def test_set_finish_in_with_active_program_raises_without_selected_program
 
 
 async def test_set_finish_in_with_active_program_translates_code_response_error() -> None:
-    """A rejected combined write still surfaces a clear, translated error."""
+    """A combined write rejected with anything but 541 surfaces a clear, translated error."""
     appliance = MagicMock()
     active_program_entity = MagicMock(uid=256, access=Access.READ_WRITE)
     appliance.entities = {"BSH.Common.Root.ActiveProgram": active_program_entity}
     appliance.selected_program = MagicMock(uid=1)
-    appliance.session.send_sync = AsyncMock(side_effect=CodeResponsError(541, "/ro/values"))
+    appliance.session.send_sync = AsyncMock(side_effect=CodeResponsError(400, "/ro/values"))
     finish_in_entity = MagicMock(uid=551)
 
     with pytest.raises(ServiceValidationError):
+        await _set_finish_in_with_active_program(appliance, finish_in_entity, 100)
+
+
+async def test_set_finish_in_with_active_program_falls_back_to_program_start() -> None:
+    """
+    After 541 on the combined write, start the program with FinishInRelative as an option.
+
+    Confirmed on a Siemens WM16XKH2EU washer (#146): it rejects the standalone
+    and the combined write with 541, and only accepts FinishInRelative as an
+    option of the /ro/activeProgram start.
+    """
+    appliance = MagicMock()
+    active_program_entity = MagicMock(uid=256, access=Access.READ_WRITE)
+    appliance.entities = {"BSH.Common.Root.ActiveProgram": active_program_entity}
+    appliance.selected_program = MagicMock(uid=28675)
+    appliance.selected_program.start = AsyncMock()
+    appliance.session.send_sync = AsyncMock(side_effect=CodeResponsError(541, "/ro/values"))
+    finish_in_entity = MagicMock(uid=551)
+
+    with patch(
+        "custom_components.homeconnect_ws.build_known_option_set",
+        return_value={24577: 5, 551: 5100},
+    ):
+        await _set_finish_in_with_active_program(appliance, finish_in_entity, 8700)
+
+    appliance.selected_program.start.assert_awaited_once_with(
+        {24577: 5, 551: 8700}, override_options=True
+    )
+
+
+async def test_set_finish_in_with_active_program_translates_program_start_error() -> None:
+    """If the program start is rejected too, surface a clear, translated error."""
+    appliance = MagicMock()
+    active_program_entity = MagicMock(uid=256, access=Access.READ_WRITE)
+    appliance.entities = {"BSH.Common.Root.ActiveProgram": active_program_entity}
+    appliance.selected_program = MagicMock(uid=1)
+    appliance.selected_program.start = AsyncMock(
+        side_effect=CodeResponsError(501, "/ro/activeProgram")
+    )
+    appliance.session.send_sync = AsyncMock(side_effect=CodeResponsError(541, "/ro/values"))
+    finish_in_entity = MagicMock(uid=551)
+
+    with (
+        patch("custom_components.homeconnect_ws.build_known_option_set", return_value={}),
+        pytest.raises(ServiceValidationError),
+    ):
         await _set_finish_in_with_active_program(appliance, finish_in_entity, 100)
