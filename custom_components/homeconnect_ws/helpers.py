@@ -298,6 +298,7 @@ def error_decorator[T](
 
 START_IN_RELATIVE = "BSH.Common.Option.StartInRelative"
 FINISH_IN_RELATIVE = "BSH.Common.Option.FinishInRelative"
+ESTIMATED_TOTAL_PROGRAM_TIME = "BSH.Common.Option.EstimatedTotalProgramTime"
 DELAY_START_NONE = "no_delay"
 DELAY_START_OPTIONS = [DELAY_START_NONE, *(f"{hours}h" for hours in range(1, 25))]
 
@@ -345,6 +346,32 @@ def delay_start_entity(appliance: HomeAppliance) -> HcEntity | None:
     return appliance.entities.get(START_IN_RELATIVE) or appliance.entities.get(FINISH_IN_RELATIVE)
 
 
+def _program_duration(
+    appliance: HomeAppliance, finish_in: HcEntity, options: dict[int, Any]
+) -> int:
+    """
+    Return the selected program's duration in seconds.
+
+    EstimatedTotalProgramTime first: FinishInRelative may already hold a
+    finish time someone set through the "Finish in" number on an appliance
+    that accepts that write, and adding the delay on top would count it
+    twice. With a program selected, the Siemens WM16XKH2EU washer reports
+    both as the program duration (3600 s for the same program, #146), so
+    FinishInRelative stays as the fallback for appliances without
+    EstimatedTotalProgramTime.
+    """
+    for source in (appliance.entities.get(ESTIMATED_TOTAL_PROGRAM_TIME), finish_in):
+        if source is None or not getattr(source, "available", True):
+            continue
+        duration = options.get(source.uid, source.value)
+        if duration is not None:
+            return int(duration)
+    raise HomeAssistantError(
+        translation_domain=DOMAIN,
+        translation_key="delay_start_duration_unknown",
+    )
+
+
 def apply_delay_start(
     appliance: HomeAppliance, delay_start: DelayStart, options: dict[int, Any]
 ) -> dict[int, Any]:
@@ -352,9 +379,7 @@ def apply_delay_start(
     Add the selected start delay to the program start options.
 
     StartInRelative gets the delay itself. FinishInRelative gets the program
-    duration plus the delay; with a program selected, the appliance reports
-    FinishInRelative as the program's own duration (confirmed on a Siemens
-    WM16XKH2EU washer, #146), so that value is the base.
+    duration plus the delay (see _program_duration for where it comes from).
     """
     seconds = delay_start.seconds
     if not seconds:
@@ -365,13 +390,7 @@ def apply_delay_start(
     if entity.name == START_IN_RELATIVE:
         value = seconds
     else:
-        duration = options.get(entity.uid, entity.value)
-        if duration is None:
-            raise HomeAssistantError(
-                translation_domain=DOMAIN,
-                translation_key="delay_start_duration_unknown",
-            )
-        value = int(duration) + seconds
+        value = _program_duration(appliance, entity, options) + seconds
     max_value = getattr(entity, "max", None)
     if max_value is not None and value > max_value:
         raise HomeAssistantError(

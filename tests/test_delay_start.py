@@ -10,6 +10,7 @@ from custom_components.homeconnect_ws.entity_descriptions.common import generate
 from custom_components.homeconnect_ws.helpers import (
     DELAY_START_NONE,
     DELAY_START_OPTIONS,
+    ESTIMATED_TOTAL_PROGRAM_TIME,
     FINISH_IN_RELATIVE,
     START_IN_RELATIVE,
     DelayStart,
@@ -235,3 +236,27 @@ async def test_start_refuses_too_long_delay_and_keeps_it(
 
     mock_appliance.session.send_sync.assert_not_awaited()
     assert hass.states.get(SELECT_ENTITY_ID).state == "24h"
+
+
+def test_apply_delay_start_finish_in_prefers_estimated_total_program_time() -> None:
+    """
+    The base is the program duration, not a finish time already set by hand.
+
+    If someone set FinishInRelative to 2 h through the number (on an appliance
+    that accepts that write), +1 h must give program duration + 1 h, not 3 h.
+    """
+    appliance = _appliance(
+        _option(FINISH_IN_RELATIVE, 551, 7200),
+        _option(ESTIMATED_TOTAL_PROGRAM_TIME, 552, 3600),
+    )
+    delay_start = DelayStart(option="1h")
+    assert apply_delay_start(appliance, delay_start, {551: 7200}) == {551: 7200}
+
+
+def test_apply_delay_start_skips_unavailable_estimated_total_program_time() -> None:
+    """An unavailable EstimatedTotalProgramTime falls back to FinishInRelative."""
+    estimated = _option(ESTIMATED_TOTAL_PROGRAM_TIME, 552, 9999)
+    estimated.available = False
+    appliance = _appliance(_option(FINISH_IN_RELATIVE, 551, 5100), estimated)
+    delay_start = DelayStart(option="1h")
+    assert apply_delay_start(appliance, delay_start, {}) == {551: 8700}
