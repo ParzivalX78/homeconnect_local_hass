@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any, Never
 
 import voluptuous as vol
@@ -34,7 +34,12 @@ from .const import (
 )
 from .coordinator import HomeConnectCoordinator
 from .entity_descriptions import get_available_entities
-from .helpers import build_known_option_set, error_decorator, get_config_entry_from_call
+from .helpers import (
+    DelayStart,
+    build_known_option_set,
+    error_decorator,
+    get_config_entry_from_call,
+)
 from .profile_storage import load_description_files, remove_description_files
 
 if TYPE_CHECKING:
@@ -68,6 +73,7 @@ class HCData:
     device_info: DeviceInfo
     available_entity_descriptions: _EntityDescriptionsType
     coordinator: HomeConnectCoordinator
+    delay_start: DelayStart = field(default_factory=DelayStart)
 
 
 @dataclass

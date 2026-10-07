@@ -4431,6 +4431,36 @@
           "middleforce": "Mittel",
           "highforce": "Hoch"
         }
+      },
+      "select_delay_start": {
+        "name": "Startverzögerung",
+        "state": {
+          "no_delay": "Keine Verzögerung",
+          "1h": "+1 h",
+          "2h": "+2 h",
+          "3h": "+3 h",
+          "4h": "+4 h",
+          "5h": "+5 h",
+          "6h": "+6 h",
+          "7h": "+7 h",
+          "8h": "+8 h",
+          "9h": "+9 h",
+          "10h": "+10 h",
+          "11h": "+11 h",
+          "12h": "+12 h",
+          "13h": "+13 h",
+          "14h": "+14 h",
+          "15h": "+15 h",
+          "16h": "+16 h",
+          "17h": "+17 h",
+          "18h": "+18 h",
+          "19h": "+19 h",
+          "20h": "+20 h",
+          "21h": "+21 h",
+          "22h": "+22 h",
+          "23h": "+23 h",
+          "24h": "+24 h"
+        }
       }
     },
     "button": {
@@ -4710,6 +4740,12 @@
     },
     "setup_cannot_connect_error": {
       "message": "Keine Verbindung zu {host} ({error}). Siehe {url}, falls sich das nicht von selbst behebt."
+    },
+    "delay_start_too_long": {
+      "message": "Die gewählte Verzögerung ist zu lang: Das Programm wäre erst in mehr als {max_hours} h fertig, was das Gerät nicht erlaubt"
+    },
+    "delay_start_duration_unknown": {
+      "message": "Die Programmdauer ist noch nicht bekannt, daher kann die Verzögerung nicht angewendet werden - bitte gleich erneut versuchen"
     }
   }
 }
