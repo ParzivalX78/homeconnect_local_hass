@@ -4260,6 +4260,20 @@
           "description": "Set the time the Program should be finished in"
         }
       }
+    },
+    "set_finish_in": {
+      "name": "Set finish time",
+      "description": "Set the time the Program should be finished in. On some Appliances this starts the selected Program with a delay.",
+      "fields": {
+        "device_id": {
+          "name": "Appliance",
+          "description": "The Appliance to set the finish time on"
+        },
+        "finish_in": {
+          "name": "Finish in",
+          "description": "Time from now until the Program should be finished, including its duration"
+        }
+      }
     }
   },
   "exceptions": {

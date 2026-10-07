@@ -155,6 +155,10 @@ async def _set_finish_in_with_active_program(
     traffic shows the only format this appliance accepts is FinishInRelative
     and ActiveProgram written together in a single /ro/values message, sent
     while ActiveProgram's own access briefly reports READ_WRITE.
+
+    If that is rejected with 541 too, or ActiveProgram never becomes
+    writable, start the selected program with FinishInRelative as a start
+    option instead (#146).
     """
     active_program_entity = appliance.entities.get("BSH.Common.Root.ActiveProgram")
     program = appliance.selected_program
@@ -163,7 +167,17 @@ async def _set_finish_in_with_active_program(
             translation_domain=DOMAIN,
             translation_key="no_program_selected",
         )
-    await _wait_for_writable(active_program_entity)
+    try:
+        await _wait_for_writable(active_program_entity)
+    except ServiceValidationError as not_writable:
+        # ActiveProgram never opened for writing, so the combined write can't
+        # be sent. The program start below doesn't need that window; if it is
+        # rejected too, report the original problem rather than the start's.
+        try:
+            await _start_selected_program(appliance, {finish_in_entity.uid: seconds})
+        except ServiceValidationError:
+            raise not_writable from None
+        return
     message = HC_Message(
         resource="/ro/values",
         action=Action.POST,
@@ -174,6 +188,35 @@ async def _set_finish_in_with_active_program(
     )
     try:
         await appliance.session.send_sync(message)
+    except CodeResponsError as exc:
+        # Confirmed on a Siemens WM16XKH2EU washer (#146): it rejects both the
+        # standalone write and this combined one with 541, and only accepts
+        # FinishInRelative as an option of the program start - the format
+        # the start_program action already uses. Last resort, so only 541.
+        if exc.code != 541:
+            _raise_start_error(exc)
+        await _start_selected_program(appliance, {finish_in_entity.uid: seconds})
+
+
+async def _start_selected_program(
+    appliance: HomeAppliance, options: dict[int, str | int | bool]
+) -> None:
+    """Start the selected program via /ro/activeProgram with the given options."""
+    program = appliance.selected_program
+    if program is None:
+        raise ServiceValidationError(
+            translation_domain=DOMAIN,
+            translation_key="no_program_selected",
+        )
+    try:
+        # The requested options on top of the known option values; the
+        # default merge would also add null for every option the appliance
+        # never reported, and the appliance rejects the write with 400.
+        # See HCStartButton.
+        await program.start(
+            {**build_known_option_set(appliance, program), **options},
+            override_options=True,
+        )
     except CodeResponsError as exc:
         _raise_start_error(exc)
 
@@ -229,24 +272,7 @@ async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
             )
             options[entity.uid] = _duration_to_seconds(call.data["finish_in"])
 
-        if appliance.selected_program:
-            try:
-                # The requested start_in/finish_in on top of the known option
-                # values; the default merge would also add null for every
-                # option the appliance never reported, and the appliance
-                # rejects the write with 400. See HCStartButton.
-                options = {
-                    **build_known_option_set(appliance, appliance.selected_program),
-                    **options,
-                }
-                await appliance.selected_program.start(options, override_options=True)
-            except CodeResponsError as exc:
-                _raise_start_error(exc)
-        else:
-            raise ServiceValidationError(
-                translation_domain=DOMAIN,
-                translation_key="no_program_selected",
-            )
+        await _start_selected_program(appliance, options)
         return None
 
     @error_decorator

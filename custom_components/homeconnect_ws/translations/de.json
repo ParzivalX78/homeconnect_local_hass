@@ -4630,6 +4630,20 @@
           "description": "Zeit einstellen, in der das Programm fertig sein soll"
         }
       }
+    },
+    "set_finish_in": {
+      "name": "Endzeit einstellen",
+      "description": "Stellt ein, in welcher Zeit das Programm fertig sein soll. Bei manchen Geräten wird dabei das ausgewählte Programm verzögert gestartet.",
+      "fields": {
+        "device_id": {
+          "name": "Gerät",
+          "description": "Das Gerät, auf dem die Endzeit eingestellt werden soll"
+        },
+        "finish_in": {
+          "name": "Fertig in",
+          "description": "Zeit ab jetzt, bis das Programm fertig sein soll, einschließlich seiner Dauer"
+        }
+      }
     }
   },
   "options": {
