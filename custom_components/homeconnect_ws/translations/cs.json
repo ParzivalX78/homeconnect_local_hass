@@ -294,7 +294,7 @@
         }
       },
       "binary_sensor_machinecareandfiltercleaningreminder": {
-        "name": "Péče o pračku a filtr"
+        "name": "Péče o myčku a filtr"
       },
       "binary_sensor_lint_filter_full": {
         "name": "Filtr vlákének",
@@ -1999,6 +1999,36 @@
           "turnofflight": "Zhasnout",
           "keeplighton": "Nechat rozsvícené"
         }
+      },
+      "select_delay_start": {
+        "name": "Odložený start",
+        "state": {
+          "no_delay": "Bez odložení",
+          "1h": "+1 h",
+          "2h": "+2 h",
+          "3h": "+3 h",
+          "4h": "+4 h",
+          "5h": "+5 h",
+          "6h": "+6 h",
+          "7h": "+7 h",
+          "8h": "+8 h",
+          "9h": "+9 h",
+          "10h": "+10 h",
+          "11h": "+11 h",
+          "12h": "+12 h",
+          "13h": "+13 h",
+          "14h": "+14 h",
+          "15h": "+15 h",
+          "16h": "+16 h",
+          "17h": "+17 h",
+          "18h": "+18 h",
+          "19h": "+19 h",
+          "20h": "+20 h",
+          "21h": "+21 h",
+          "22h": "+22 h",
+          "23h": "+23 h",
+          "24h": "+24 h"
+        }
       }
     },
     "button": {
@@ -2238,6 +2268,12 @@
     },
     "setup_cannot_connect_error": {
       "message": "Nelze se připojit k {host} ({error}). Pokud se to nevyřeší samo, podívejte se na {url}."
+    },
+    "delay_start_too_long": {
+      "message": "Zvolené odložení je příliš dlouhé: program by skončil za více než {max_hours} h, což spotřebič neumožňuje"
+    },
+    "delay_start_duration_unknown": {
+      "message": "Délka programu zatím není známá, proto odložení nelze použít - zkuste to prosím za chvíli"
     }
   },
   "options": {
