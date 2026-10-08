@@ -602,6 +602,7 @@ TRANSLATION_DOMAINS = {
     "select": "select",
     "sensor": "sensor",
     "start_button": "button",
+    "delay_start": "select",
     "switch": "switch",
     "update": "update",
     "wifi": "sensor",

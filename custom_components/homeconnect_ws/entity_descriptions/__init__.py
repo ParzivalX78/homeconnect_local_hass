@@ -101,6 +101,7 @@ def get_available_entities(appliance: HomeAppliance) -> _EntityDescriptionsType:
         "select": [],
         "sensor": [],
         "start_button": [],
+        "delay_start": [],
         "switch": [],
         "wifi": [],
         "ipv4": [],
