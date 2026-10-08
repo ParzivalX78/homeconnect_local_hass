@@ -455,6 +455,12 @@
             }
         },
         "select": {
+            "select_delay_start": {
+                "default": "mdi:timer-play-outline",
+                "state": {
+                    "no_delay": "mdi:play-outline"
+                }
+            },
             "select_drying_assistant_all_programs": {},
             "select_hot_water": {
                 "default": "mdi:water-thermometer-outline"

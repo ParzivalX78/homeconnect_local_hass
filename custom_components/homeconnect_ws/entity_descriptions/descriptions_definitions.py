@@ -204,6 +204,7 @@ class EntityDescriptions(TypedDict, total=False):
     select: list[HCSelectEntityDescription]
     sensor: list[HCSensorEntityDescription]
     start_button: list[HCButtonEntityDescription]
+    delay_start: list[HCSelectEntityDescription]
     switch: list[HCSwitchEntityDescription]
     wifi: list[HCSensorEntityDescription]
     ipv4: list[HCSensorEntityDescription]
@@ -224,6 +225,7 @@ _EntityDescriptionsDefinitionsType = dict[
         "select",
         "sensor",
         "start_button",
+        "delay_start",
         "switch",
         "wifi",
         "ipv4",
@@ -250,6 +252,7 @@ _EntityDescriptionsType = dict[
         "select",
         "sensor",
         "start_button",
+        "delay_start",
         "switch",
         "wifi",
         "ipv4",
